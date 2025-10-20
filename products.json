@@ -1,0 +1,56 @@
+[
+  {
+    "name": "Parastol",
+    "type": "أقراص",
+    "price": 165,
+    "image": "parastol.jpg"
+  },
+  {
+    "name": "Coldin",
+    "type": "شراب",
+    "price": 715,
+    "image": "coldin.jpg"
+  },
+  {
+    "name": "Betnozum",
+    "type": "كريم",
+    "price": 350,
+    "image": "betnozum.jpg"
+  },
+  {
+    "name": "Panadol Extra",
+    "type": "أقراص",
+    "price": 1200,
+    "image": "panadol-extra.jpg"
+  },
+  {
+    "name": "Brufen",
+    "type": "أقراص",
+    "price": 950,
+    "image": "brufen.jpg"
+  },
+  {
+    "name": "Cataflam",
+    "type": "أقراص",
+    "price": 1100,
+    "image": "cataflam.jpg"
+  },
+  {
+    "name": "Augmentin",
+    "type": "شراب",
+    "price": 2100,
+    "image": "augmentin.jpg"
+  },
+  {
+    "name": "Ventolin",
+    "type": "بخاخ",
+    "price": 1750,
+    "image": "ventolin.jpg"
+  },
+  {
+    "name": "Amoclan",
+    "type": "شراب",
+    "price": 1850,
+    "image": "amoclan.jpg"
+  }
+]
