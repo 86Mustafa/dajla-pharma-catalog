@@ -63,7 +63,7 @@
         "name": "ALARMEEN -D 25mg ",
         "type": "tab",
         "price": 110,
-        "image": "ALARMEEN .img"
+        "image": "ALARMEEN.img"
     },
     {
         "name": "ASPRIN-D LITTLE",
@@ -510,3 +510,4 @@
         "image": "Panadolz_infant.img"
     }
 ]
+
