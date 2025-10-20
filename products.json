@@ -63,7 +63,7 @@
         "name": "ALARMEEN -D 25mg ",
         "type": "tab",
         "price": 110,
-        "image": "ALARMEEN.img"
+        "image": "ALARMEEN .img"
     },
     {
         "name": "ASPRIN-D LITTLE",
@@ -99,7 +99,7 @@
         "name": "Asprin -D 100mg ",
         "type": "tab",
         "price": 100,
-        "image": "Asprin1.img"
+        "image": "Asprin1.jpg"
     },
     {
         "name": "Panadij 500mg tab بوكس 50 شريط",
@@ -510,4 +510,3 @@
         "image": "Panadolz_infant.img"
     }
 ]
-
