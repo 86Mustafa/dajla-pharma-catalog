@@ -13,7 +13,8 @@
     .subtitle{font-size:13px;opacity:.95}
     .container{max-width:980px;margin:20px auto;padding:0 16px}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-    .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(11,99,179,0.08);display:flex;flex-direction:column;align-items:center;text-align:center}
+    .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(11,99,179,0.08);display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:transform 0.2s ease;}
+    .card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(11,99,179,0.12)}
     .card img{width:130px;height:130px;object-fit:contain;border-radius:8px;background:#fff;padding:6px;border:1px solid #f0f0f0;}
     .name{font-weight:700;margin-top:10px;font-size:15px;}
     .type{font-size:13px;color:var(--muted);margin-top:6px;min-height:36px;}
@@ -30,7 +31,28 @@
     textarea{resize:none;height:60px}
     .loading{text-align:center;padding:20px;color:var(--muted)}
     .error{text-align:center;padding:20px;color:#dc2626;background:#fef2f2;border-radius:8px;margin:10px}
-    @media(max-width:520px){.card img{width:110px;height:110px}}
+    
+    /* نمط البطاقة الموسعة */
+    .overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+    .expanded-card{background:white;border-radius:20px;padding:30px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;position:relative;text-align:center;}
+    .close-btn{position:absolute;top:15px;left:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#666;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+    .close-btn:hover{background:#f5f5f5;}
+    .expanded-image{width:200px;height:200px;object-fit:contain;margin-bottom:20px;}
+    .expanded-name{font-size:24px;font-weight:700;color:#333;margin-bottom:10px;}
+    .expanded-type{font-size:16px;color:var(--muted);margin-bottom:15px;}
+    .expanded-price{font-size:20px;font-weight:700;color:var(--blue);margin-bottom:20px;}
+    .expanded-qty{display:flex;align-items:center;justify-content:center;gap:15px;margin:25px 0;}
+    .expanded-qty button{width:50px;height:50px;border-radius:12px;border:2px solid #e6eefb;background:white;cursor:pointer;font-size:20px;font-weight:bold;}
+    .expanded-qty input{width:80px;height:50px;text-align:center;border:2px solid #e6eefb;border-radius:12px;font-size:18px;font-weight:bold;}
+    .add-to-cart{background:var(--blue);color:white;border:none;padding:15px 30px;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px;width:100%;}
+    .add-to-cart:hover{background:#0a5aa3;}
+    
+    @media(max-width:520px){
+      .card img{width:110px;height:110px}
+      .expanded-card{padding:20px;}
+      .expanded-image{width:150px;height:150px;}
+      .expanded-name{font-size:20px;}
+    }
   </style>
 </head>
 <body>
@@ -47,6 +69,23 @@
     <section class="grid" id="products"></section>
   </main>
 
+  <!-- البطاقة الموسعة -->
+  <div class="overlay" id="overlay">
+    <div class="expanded-card" id="expandedCard">
+      <button class="close-btn" id="closeBtn">×</button>
+      <img class="expanded-image" id="expandedImage" src="" alt="">
+      <div class="expanded-name" id="expandedName"></div>
+      <div class="expanded-type" id="expandedType"></div>
+      <div class="expanded-price" id="expandedPrice"></div>
+      <div class="expanded-qty">
+        <button class="dec-expanded">−</button>
+        <input type="number" min="0" value="0" class="count-expanded" id="expandedCount">
+        <button class="inc-expanded">+</button>
+      </div>
+      <button class="add-to-cart" id="addToCart">إضافة إلى الطلب</button>
+    </div>
+  </div>
+
   <footer>
     <div class="summary">
       <div>إجمالي الطلب</div>
@@ -57,10 +96,7 @@
       <input type="text" id="custName" placeholder="اسم الصيدلية " required>
       <input type="tel" id="custPhone" placeholder="رقم الهاتف" required>
       <input type="text" id="custAddress" placeholder="العنوان" />
-      <select id="paymentMethod">
-        <option value="نقداً">نقداً</option>
-        <option value="تحويل">تحويل</option>
-      </select>
+      <!-- تم إخفاء حقل طريقة الدفع -->
       <textarea id="custNotes" placeholder="ملاحظات التجهيز (اسم المذخر)"></textarea>
       <button type="button" class="btn" id="send">إرسال الطلب عبر واتساب</button>
     </form>
@@ -68,10 +104,10 @@
 
   <script>
     const WHATSAPP_NUMBER = '9647812374712';
+    let currentExpandedCard = null;
     
     // دالة لتحويل الامتداد من .img إلى .jpg
     function convertImageExtension(imageName) {
-      // إزالة الامتداد .img وإضافة .jpg بدلاً منه
       return imageName.replace('.img', '.jpg').replace('.IMG', '.jpg');
     }
 
@@ -83,7 +119,6 @@
       let products = [];
       
       try {
-        // محاولة تحميل products.json
         const response = await fetch('products.json');
         if (response.ok) {
           products = await response.json();
@@ -92,7 +127,6 @@
           throw new Error('ملف products.json غير موجود');
         }
       } catch (err) {
-        // استخدام البيانات الافتراضية إذا فشل التحميل
         products = [];
         errorDiv.style.display = 'block';
         errorDiv.innerHTML = `
@@ -108,11 +142,8 @@
         return;
       }
       
-      // التحقق من كل صورة
       for (let i = 0; i < products.length; i++) {
         const item = products[i];
-        
-        // تحويل امتداد الصورة من .img إلى .jpg
         const correctedImageName = convertImageExtension(item.image);
         const imageUrl = `images/${correctedImageName}`;
         
@@ -122,13 +153,13 @@
         card.dataset.name = item.name;
         card.dataset.type = item.type;
         card.dataset.price = item.price;
+        card.dataset.image = imageUrl;
         
-        // صورة افتراضية بالعربية
         const placeholderImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9Ijc1IiB5PSI3NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5Ij7Yp9mE2YXYs9in2KEg2KfZhNi52YbYr9mKPC90ZXh0Pjwvc3ZnPg==';
         
         card.innerHTML = `
           <img src="${imageUrl}" alt="${item.name}" 
-               onerror="this.src='${placeholderImage}'; console.log('خطأ في الصورة: ${imageUrl}')" />
+               onerror="this.src='${placeholderImage}'" />
           <div class="name">${item.name}</div>
           <div class="type">${item.type}</div>
           <div class="price">سعر القطعة: <span>${formatCurrency(item.price)}</span> د.ع</div>
@@ -143,30 +174,130 @@
       loading.style.display = 'none';
       attachEvents();
       recalc();
-      
-      // إظهار تحذير إذا كانت هناك صور بأمتداد .img
-      const hasImgExtension = products.some(item => item.image.includes('.img'));
-      if (hasImgExtension) {
-        errorDiv.style.display = 'block';
-        errorDiv.innerHTML = `
-          <strong>ملاحظة:</strong> يتم تحويل امتدادات الصور من .img إلى .jpg تلقائياً.
-          <br>للحصول على أفضل أداء، قم بتغيير امتدادات الملفات إلى .jpg أو .png
-        `;
-      }
     }
 
     function formatCurrency(n){return n.toLocaleString('en-US');}
 
+    // دالة لعرض البطاقة الموسعة
+    function expandCard(card) {
+      const overlay = document.getElementById('overlay');
+      const expandedImage = document.getElementById('expandedImage');
+      const expandedName = document.getElementById('expandedName');
+      const expandedType = document.getElementById('expandedType');
+      const expandedPrice = document.getElementById('expandedPrice');
+      const expandedCount = document.getElementById('expandedCount');
+      
+      const name = card.dataset.name;
+      const type = card.dataset.type;
+      const price = card.dataset.price;
+      const image = card.dataset.image;
+      const currentQty = card.querySelector('.count').value;
+      
+      expandedImage.src = image;
+      expandedName.textContent = name;
+      expandedType.textContent = type;
+      expandedPrice.textContent = `سعر القطعة: ${formatCurrency(price)} د.ع`;
+      expandedCount.value = currentQty;
+      
+      currentExpandedCard = card;
+      overlay.style.display = 'flex';
+      
+      // إضافة event listeners للكمية في البطاقة الموسعة
+      const incExpanded = document.querySelector('.inc-expanded');
+      const decExpanded = document.querySelector('.dec-expanded');
+      
+      incExpanded.onclick = () => {
+        expandedCount.value = Math.max(0, Number(expandedCount.value || 0) + 1);
+      };
+      
+      decExpanded.onclick = () => {
+        expandedCount.value = Math.max(0, Number(expandedCount.value || 0) - 1);
+      };
+      
+      expandedCount.onchange = () => {
+        if (Number(expandedCount.value) < 0) expandedCount.value = 0;
+      };
+    }
+
+    // دالة لإغلاق البطاقة الموسعة
+    function closeExpandedCard() {
+      const overlay = document.getElementById('overlay');
+      overlay.style.display = 'none';
+      currentExpandedCard = null;
+    }
+
+    // دالة لإضافة الكمية من البطاقة الموسعة إلى البطاقة الأصلية
+    function addToCartFromExpanded() {
+      if (currentExpandedCard) {
+        const expandedCount = document.getElementById('expandedCount');
+        const originalInput = currentExpandedCard.querySelector('.count');
+        originalInput.value = expandedCount.value;
+        recalc();
+        closeExpandedCard();
+      }
+    }
+
     function attachEvents(){
-      const cards=document.querySelectorAll('.card');
-      cards.forEach(card=>{
-        const inc=card.querySelector('.inc');
-        const dec=card.querySelector('.dec');
-        const input=card.querySelector('.count');
-        inc.addEventListener('click',()=>{input.value=Math.max(0,Number(input.value||0)+1);recalc();});
-        dec.addEventListener('click',()=>{input.value=Math.max(0,Number(input.value||0)-1);recalc();});
-        input.addEventListener('change',()=>{if(Number(input.value)<0)input.value=0;recalc();});
-        input.addEventListener('input',()=>{if(Number(input.value)<0)input.value=0;recalc();});
+      const cards = document.querySelectorAll('.card');
+      const closeBtn = document.getElementById('closeBtn');
+      const overlay = document.getElementById('overlay');
+      const addToCartBtn = document.getElementById('addToCart');
+      
+      // إضافة حدث النقر للبطاقات
+      cards.forEach(card => {
+        card.addEventListener('click', (e) => {
+          // منع فتح البطاقة الموسعة عند النقر على أزرار الكمية
+          if (!e.target.classList.contains('dec') && 
+              !e.target.classList.contains('inc') && 
+              !e.target.classList.contains('count')) {
+            expandCard(card);
+          }
+        });
+        
+        // أحداث أزرار الكمية في البطاقات الصغيرة
+        const inc = card.querySelector('.inc');
+        const dec = card.querySelector('.dec');
+        const input = card.querySelector('.count');
+        
+        inc.addEventListener('click', (e) => {
+          e.stopPropagation();
+          input.value = Math.max(0, Number(input.value || 0) + 1);
+          recalc();
+        });
+        
+        dec.addEventListener('click', (e) => {
+          e.stopPropagation();
+          input.value = Math.max(0, Number(input.value || 0) - 1);
+          recalc();
+        });
+        
+        input.addEventListener('change', () => {
+          if (Number(input.value) < 0) input.value = 0;
+          recalc();
+        });
+        
+        input.addEventListener('input', () => {
+          if (Number(input.value) < 0) input.value = 0;
+          recalc();
+        });
+      });
+      
+      // أحداث البطاقة الموسعة
+      closeBtn.addEventListener('click', closeExpandedCard);
+      addToCartBtn.addEventListener('click', addToCartFromExpanded);
+      
+      // إغلاق البطاقة الموسعة عند النقر خارجها
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          closeExpandedCard();
+        }
+      });
+      
+      // إغلاق البطاقة الموسعة بالزر Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.style.display === 'flex') {
+          closeExpandedCard();
+        }
       });
     }
 
@@ -185,7 +316,6 @@
       const name=document.getElementById('custName').value.trim();
       const phone=document.getElementById('custPhone').value.trim();
       const address=document.getElementById('custAddress').value.trim();
-      const payment=document.getElementById('paymentMethod').value;
       const notes=document.getElementById('custNotes').value.trim();
 
       const items=[];let total=0;
@@ -224,7 +354,6 @@
       msg+=`🏢 الاسم: ${name}%0A`;
       msg+=`📞 رقم الهاتف: ${phone}%0A`;
       msg+=`📍 العنوان: ${address||'—'}%0A`;
-      msg+=`💳 طريقة الدفع: ${payment}%0A`;
       if(notes) msg+=`📝 ملاحظات: ${notes}%0A`;
       msg+='%0Aشكراً لتعاملكم مع شركة دجلة للصناعات الدوائية 🏥';
 
