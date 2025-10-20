@@ -1,56 +1,512 @@
 [
-  {
-    "name": "Parastol",
-    "type": "أقراص",
-    "price": 165,
-    "image": "parastol.jpg"
-  },
-  {
-    "name": "Coldin",
-    "type": "شراب",
-    "price": 715,
-    "image": "coldin.jpg"
-  },
-  {
-    "name": "Betnozum",
-    "type": "كريم",
-    "price": 350,
-    "image": "betnozum.jpg"
-  },
-  {
-    "name": "Panadol Extra",
-    "type": "أقراص",
-    "price": 1200,
-    "image": "panadol-extra.jpg"
-  },
-  {
-    "name": "Brufen",
-    "type": "أقراص",
-    "price": 950,
-    "image": "brufen.jpg"
-  },
-  {
-    "name": "Cataflam",
-    "type": "أقراص",
-    "price": 1100,
-    "image": "cataflam.jpg"
-  },
-  {
-    "name": "Augmentin",
-    "type": "شراب",
-    "price": 2100,
-    "image": "augmentin.jpg"
-  },
-  {
-    "name": "Ventolin",
-    "type": "بخاخ",
-    "price": 1750,
-    "image": "ventolin.jpg"
-  },
-  {
-    "name": "Amoclan",
-    "type": "شراب",
-    "price": 1850,
-    "image": "amoclan.jpg"
-  }
+    {
+        "name": "PARASTOL-D 500mg ",
+        "type": "tab",
+        "price": 165,
+        "image": "PARASTOL.img"
+    },
+    {
+        "name": "LIEBRAX-D ",
+        "type": "tab",
+        "price": 365,
+        "image": "LIEBRAX.img"
+    },
+    {
+        "name": "DITRAZOLE – 500 ",
+        "type": "tab",
+        "price": 275,
+        "image": "DITRAZOLE.img"
+    },
+    {
+        "name": "TRIMETHOPRIM ",
+        "type": "tab",
+        "price": 498,
+        "image": "TRIMETHOPRIM.img"
+    },
+    {
+        "name": "PRESILON-D 5mg ",
+        "type": "tab",
+        "price": 185,
+        "image": "PRESILON.img"
+    },
+    {
+        "name": "DR- STELABIDZ ",
+        "type": "tab",
+        "price": 178,
+        "image": "DR.img"
+    },
+    {
+        "name": "SPASMOBAN باكيت",
+        "type": "tab",
+        "price": 1700,
+        "image": "SPASMOBAN.img"
+    },
+    {
+        "name": "ALDOMETZONE 250mg 30tab",
+        "type": "tab",
+        "price": 2995,
+        "image": "ALDOMETZONE.img"
+    },
+    {
+        "name": "RIEBAL –D باكيت",
+        "type": "tab",
+        "price": 1082,
+        "image": "RIEBAL.img"
+    },
+    {
+        "name": "Flow out",
+        "type": "tab",
+        "price": 220,
+        "image": "Flow.img"
+    },
+    {
+        "name": "ALARMEEN -D 25mg ",
+        "type": "tab",
+        "price": 110,
+        "image": "ALARMEEN .img"
+    },
+    {
+        "name": "ASPRIN-D LITTLE",
+        "type": "tab",
+        "price": 129,
+        "image": "ASPRIN.img"
+    },
+    {
+        "name": "Dixsoon ",
+        "type": "tab",
+        "price": 95,
+        "image": "Dixsoon.img"
+    },
+    {
+        "name": "Diapam 5",
+        "type": "tab",
+        "price": 315,
+        "image": "Diapam.img"
+    },
+    {
+        "name": "Diazepam 2mg ",
+        "type": "tab",
+        "price": 340,
+        "image": "Diazepam.img"
+    },
+    {
+        "name": "Digesic ",
+        "type": "tab",
+        "price": 350,
+        "image": "Digesic.img"
+    },
+    {
+        "name": "Asprin -D 100mg ",
+        "type": "tab",
+        "price": 100,
+        "image": "Asprin .img"
+    },
+    {
+        "name": "Panadij 500mg tab بوكس 50 شريط",
+        "type": "tab",
+        "price": 11650,
+        "image": "Panadij.img"
+    },
+    {
+        "name": "Dr-interstopz 2mg ",
+        "type": "tab",
+        "price": 179,
+        "image": "Dr.img"
+    },
+    {
+        "name": "Algesec ",
+        "type": "tab",
+        "price": 578,
+        "image": "Algesec.img"
+    },
+    {
+        "name": "Lebroxid 5mg ",
+        "type": "tab",
+        "price": 316,
+        "image": "Lebroxid.img"
+    },
+    {
+        "name": "PRESILON-D5mg بوكس 50 شريط",
+        "type": "tab",
+        "price": 10815,
+        "image": "PRESILON.img"
+    },
+    {
+        "name": "Betnozum/   (بدون)",
+        "type": "cream",
+        "price": 337,
+        "image": "Betnozum.img"
+    },
+    {
+        "name": "Betnozum/ (بدون) ",
+        "type": "ointment",
+        "price": 395,
+        "image": "Betnozum.img"
+    },
+    {
+        "name": "Betnozum/ (باكيت) ",
+        "type": "ointment",
+        "price": 437,
+        "image": "Betnozum.img"
+    },
+    {
+        "name": "Dormadiem/ (بدون)",
+        "type": "cream",
+        "price": 355,
+        "image": "Dormadiem.img"
+    },
+    {
+        "name": "Dormocalmin/(باكيت)",
+        "type": "cream",
+        "price": 500,
+        "image": "Dormocalmin.img"
+    },
+    {
+        "name": "Dr-Betnozam/  (باكيت)",
+        "type": "cream",
+        "price": 420,
+        "image": "Dr.img"
+    },
+    {
+        "name": "Dormadiem/  ",
+        "type": "ointment",
+        "price": 365,
+        "image": "Dormadiem.img"
+    },
+    {
+        "name": "Dr-cetramex/ (باكيت)",
+        "type": "cream",
+        "price": 399,
+        "image": "Dr.img"
+    },
+    {
+        "name": "Dr- cetramex/  (بدون)",
+        "type": "cream",
+        "price": 370,
+        "image": "Dr.img"
+    },
+    {
+        "name": "Flamoozeen-D/ (باكيت)",
+        "type": "cream",
+        "price": 786,
+        "image": "Flamoozeen.img"
+    },
+    {
+        "name": "Fugideen-D/ (بدون)",
+        "type": "cream",
+        "price": 320,
+        "image": "Fugideen.img"
+    },
+    {
+        "name": "Fugideen-D/  (باكيت)",
+        "type": "cream",
+        "price": 359,
+        "image": "Fugideen.img"
+    },
+    {
+        "name": "Fucidic - Acid / (باكيت)",
+        "type": "cream",
+        "price": 1050,
+        "image": "Fucidic .img"
+    },
+    {
+        "name": "Nastocord /  (بدون)",
+        "type": "cream",
+        "price": 750,
+        "image": "Nastocord.img"
+    },
+    {
+        "name": "Nastocord / (باكيت)",
+        "type": "cream",
+        "price": 785,
+        "image": "Nastocord.img"
+    },
+    {
+        "name": "Hydrocortizon-D/ (بدون)",
+        "type": "cream",
+        "price": 559,
+        "image": "Hydrocortizon.img"
+    },
+    {
+        "name": "Hydrocortizon-D/ (باكيت)",
+        "type": "cream",
+        "price": 630,
+        "image": "Hydrocortizon.img"
+    },
+    {
+        "name": "Nastocord /(باكيت)",
+        "type": "ointment",
+        "price": 785,
+        "image": "Nastocord.img"
+    },
+    {
+        "name": "Nastocord /(بدون)",
+        "type": "ointment",
+        "price": 750,
+        "image": "Nastocord.img"
+    },
+    {
+        "name": "Quderm/  (باكيت)",
+        "type": "cream",
+        "price": 770,
+        "image": "Quderm.img"
+    },
+    {
+        "name": "Tetracyclen-D/ (بدون)",
+        "type": "ointment",
+        "price": 525,
+        "image": "Tetracyclen.img"
+    },
+    {
+        "name": "Tetracyclen-D/ (باكيت)",
+        "type": "ointment",
+        "price": 540,
+        "image": "Tetracyclen.img"
+    },
+    {
+        "name": "Zinc Oxed-D/ (بدون)",
+        "type": "ointment",
+        "price": 530,
+        "image": "Zinc Oxed.img"
+    },
+    {
+        "name": "Zinc Oxed-D/(باكيت)",
+        "type": "ointment",
+        "price": 565,
+        "image": "Zinc Oxed.img"
+    },
+    {
+        "name": "Whi-Felz/ (بدون)",
+        "type": "ointment",
+        "price": 715,
+        "image": "Whi.img"
+    },
+    {
+        "name": "Whi-Felz/ (باكيت)",
+        "type": "ointment",
+        "price": 750,
+        "image": "Whi.img"
+    },
+    {
+        "name": "Betnozum-gen 15g   ",
+        "type": "cream",
+        "price": 475,
+        "image": "Betnozum.img"
+    },
+    {
+        "name": "Dormadiem/ 25g (بدون)",
+        "type": "cream",
+        "price": 389,
+        "image": "Dormadiem.img"
+    },
+    {
+        "name": "Dormadiem/ 25g((باكيت",
+        "type": "ointment",
+        "price": 437,
+        "image": "Dormadiem.img"
+    },
+    {
+        "name": "Dormocalmin/(بدون)",
+        "type": "cream",
+        "price": 480,
+        "image": "Dormocalmin.img"
+    },
+    {
+        "name": "Sodium fusidate ((باكيت",
+        "type": "ointment",
+        "price": 1050,
+        "image": "Sodium.img"
+    },
+    {
+        "name": "Alermiden/ (باكيت)",
+        "type": "syrup",
+        "price": 570,
+        "image": "Alermiden.img"
+    },
+    {
+        "name": "Alermiden/ (بدون)",
+        "type": "syrup",
+        "price": 415,
+        "image": "Alermiden.img"
+    },
+    {
+        "name": "Buetarin-D/(باكيت)",
+        "type": "syrup",
+        "price": 525,
+        "image": "Buetarin.img"
+    },
+    {
+        "name": "Buetarin-D/(بدون)",
+        "type": "syrup",
+        "price": 369,
+        "image": "Buetarin.img"
+    },
+    {
+        "name": "Coldin-D/(باكيت)",
+        "type": "syrup",
+        "price": 715,
+        "image": "Coldin.img"
+    },
+    {
+        "name": "Coldin-D/(بدون)",
+        "type": "syrup",
+        "price": 590,
+        "image": "Coldin.img"
+    },
+    {
+        "name": "Dij-Exdile/(باكيت)",
+        "type": "syrup",
+        "price": 730,
+        "image": "Dij.img"
+    },
+    {
+        "name": "Dij-Exdile/(بدون)",
+        "type": "syrup",
+        "price": 530,
+        "image": "Dij.img"
+    },
+    {
+        "name": "Dixon-D/(باكيت)",
+        "type": "syrup",
+        "price": 550,
+        "image": "Dixon.img"
+    },
+    {
+        "name": "Dixon-D/(بدون)",
+        "type": "syrup",
+        "price": 385,
+        "image": "Dixon.img"
+    },
+    {
+        "name": "Dr-Actifeedz/(باكيت)",
+        "type": "syrup",
+        "price": 1675,
+        "image": "Dr.img"
+    },
+    {
+        "name": "Dr-Panadolz/250mg (باكيت)",
+        "type": "syrup",
+        "price": 785,
+        "image": "Dr.img"
+    },
+    {
+        "name": "Miedozol-D/ / (باكيت)",
+        "type": "syrup",
+        "price": 760,
+        "image": "Miedozol.img"
+    },
+    {
+        "name": "Tussidan/ (باكيت)",
+        "type": "syrup",
+        "price": 550,
+        "image": "Tussidan.img"
+    },
+    {
+        "name": "Tousslit-d /  (بدون)",
+        "type": "syrup",
+        "price": 450,
+        "image": "Tousslit.img"
+    },
+    {
+        "name": "Siedlar-D/(باكيت)",
+        "type": "syrup",
+        "price": 800,
+        "image": "Siedlar.img"
+    },
+    {
+        "name": "Siedlar-D/ (بدون)",
+        "type": "syrup",
+        "price": 575,
+        "image": "Siedlar.img"
+    },
+    {
+        "name": "Silvodeen-D/(باكيت)",
+        "type": "syrup",
+        "price": 550,
+        "image": "Silvodeen.img"
+    },
+    {
+        "name": "Silvodeen-D/ (بدون)",
+        "type": "syrup",
+        "price": 399,
+        "image": "Silvodeen.img"
+    },
+    {
+        "name": "Samerim/(باكيت)",
+        "type": "syrup",
+        "price": 572,
+        "image": "Samerim.img"
+    },
+    {
+        "name": "Samerim/ (بدون)",
+        "type": "syrup",
+        "price": 428,
+        "image": "Samerim.img"
+    },
+    {
+        "name": "Pyrolz/ 120mg (باكيت)",
+        "type": "syrup",
+        "price": 500,
+        "image": "Pyrolz.img"
+    },
+    {
+        "name": "Panadol-D/120mg (باكيت)",
+        "type": "syrup",
+        "price": 815,
+        "image": "Panadol.img"
+    },
+    {
+        "name": "Prostan / (باكيت)",
+        "type": "susp",
+        "price": 760,
+        "image": "Prostan.img"
+    },
+    {
+        "name": "Antipyral  120mg",
+        "type": "syrup",
+        "price": 578,
+        "image": "Antipyral.img"
+    },
+    {
+        "name": "Ibuprofen / (باكيت)",
+        "type": "susp",
+        "price": 710,
+        "image": "Ibuprofen.img"
+    },
+    {
+        "name": "Ketoveen /  (باكيت)",
+        "type": "syrup",
+        "price": 640,
+        "image": "Ketoveen.img"
+    },
+    {
+        "name": " Vomodij /   (باكيت)",
+        "type": "syrup",
+        "price": 1430,
+        "image": "Vomodij.img"
+    },
+    {
+        "name": "No-Spasmo/",
+        "type": "drop",
+        "price": 560,
+        "image": "No.img"
+    },
+    {
+        "name": "Dij-Finesteel/ 15ml",
+        "type": "drop",
+        "price": 1289,
+        "image": "Dij.img"
+    },
+    {
+        "name": "Dr-Spastalz/",
+        "type": "drop",
+        "price": 1675,
+        "image": "Dr.img"
+    },
+    {
+        "name": "Dr-Panadolz infant/",
+        "type": "drop",
+        "price": 830,
+        "image": "Dr.img"
+    }
 ]
