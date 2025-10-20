@@ -69,45 +69,11 @@
   <script>
     const WHATSAPP_NUMBER = '9647812374712';
     
-    // بيانات المنتجات الافتراضية (كنسخة احتياطية إذا لم يعمل products.json)
-    const defaultProducts = [
-      {
-        "name": "باراسيتامول",
-        "type": "مسكن وأخاف للحرارة 500 مجم",
-        "price": 5000,
-        "image": "paracetamol.jpg"
-      },
-      {
-        "name": "أموكسيسيلين", 
-        "type": "مضاد حيوي 500 مجم",
-        "price": 8000,
-        "image": "amoxicillin.jpg"
-      },
-      {
-        "name": "ايبوبروفين",
-        "type": "مسكن ومضاد للالتهاب 400 مجم", 
-        "price": 6000,
-        "image": "ibuprofen.jpg"
-      },
-      {
-        "name": "فيتامين سي",
-        "type": "مكمل غذائي 1000 مجم",
-        "price": 4500,
-        "image": "vitamin-c.jpg"
-      },
-      {
-        "name": "أوميغا 3",
-        "type": "مكمل غذائي للقلب والمخ",
-        "price": 12000,
-        "image": "omega-3.jpg"
-      },
-      {
-        "name": "كريم مرطب",
-        "type": "للبشرة الجافة والحساسة",
-        "price": 7500,
-        "image": "moisturizer.jpg"
-      }
-    ];
+    // دالة لتحويل الامتداد من .img إلى .jpg
+    function convertImageExtension(imageName) {
+      // إزالة الامتداد .img وإضافة .jpg بدلاً منه
+      return imageName.replace('.img', '.jpg').replace('.IMG', '.jpg');
+    }
 
     async function loadProducts() {
       const container = document.getElementById('products');
@@ -121,36 +87,48 @@
         const response = await fetch('products.json');
         if (response.ok) {
           products = await response.json();
-          loading.style.display = 'none';
+          loading.textContent = 'جاري تحميل المنتجات...';
         } else {
           throw new Error('ملف products.json غير موجود');
         }
       } catch (err) {
         // استخدام البيانات الافتراضية إذا فشل التحميل
-        products = defaultProducts;
-        loading.style.display = 'none';
+        products = [];
         errorDiv.style.display = 'block';
         errorDiv.innerHTML = `
-          <strong>ملاحظة:</strong> يتم استخدام بيانات افتراضية. 
-          <br>لإضافة منتجاتك الحقيقية، أنشئ ملف products.json وأضف صور المنتجات في مجلد images/
+          <strong>خطأ في التحميل:</strong> ${err.message}
+          <br>الرجاء التأكد من وجود ملف products.json
         `;
       }
       
       container.innerHTML = '';
-      products.forEach((item, index) => {
+      
+      if (products.length === 0) {
+        loading.textContent = 'لا توجد منتجات متاحة';
+        return;
+      }
+      
+      // التحقق من كل صورة
+      for (let i = 0; i < products.length; i++) {
+        const item = products[i];
+        
+        // تحويل امتداد الصورة من .img إلى .jpg
+        const correctedImageName = convertImageExtension(item.image);
+        const imageUrl = `images/${correctedImageName}`;
+        
         const card = document.createElement('article');
         card.className = 'card';
-        card.dataset.id = index + 1;
+        card.dataset.id = i + 1;
         card.dataset.name = item.name;
         card.dataset.type = item.type;
         card.dataset.price = item.price;
         
-        // صورة افتراضية إذا لم توجد الصورة
-        const imagePlaceholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9Ijc1IiB5PSI3NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5Ij7Yp9mE2YXYs9in2KEg2KfZhNi52YbYr9mKPC90ZXh0Pjwvc3ZnPg==';
+        // صورة افتراضية بالعربية
+        const placeholderImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9Ijc1IiB5PSI3NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5Ij7Yp9mE2YXYs9in2KEg2KfZhNi52YbYr9mKPC90ZXh0Pjwvc3ZnPg==';
         
         card.innerHTML = `
-          <img src="images/${item.image}" alt="${item.name}" 
-               onerror="this.src='${imagePlaceholder}'" />
+          <img src="${imageUrl}" alt="${item.name}" 
+               onerror="this.src='${placeholderImage}'; console.log('خطأ في الصورة: ${imageUrl}')" />
           <div class="name">${item.name}</div>
           <div class="type">${item.type}</div>
           <div class="price">سعر القطعة: <span>${formatCurrency(item.price)}</span> د.ع</div>
@@ -160,9 +138,21 @@
             <button class="inc">+</button>
           </div>`;
         container.appendChild(card);
-      });
+      }
+      
+      loading.style.display = 'none';
       attachEvents();
       recalc();
+      
+      // إظهار تحذير إذا كانت هناك صور بأمتداد .img
+      const hasImgExtension = products.some(item => item.image.includes('.img'));
+      if (hasImgExtension) {
+        errorDiv.style.display = 'block';
+        errorDiv.innerHTML = `
+          <strong>ملاحظة:</strong> يتم تحويل امتدادات الصور من .img إلى .jpg تلقائياً.
+          <br>للحصول على أفضل أداء، قم بتغيير امتدادات الملفات إلى .jpg أو .png
+        `;
+      }
     }
 
     function formatCurrency(n){return n.toLocaleString('en-US');}
