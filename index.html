@@ -14,32 +14,36 @@
     .container{max-width:980px;margin:20px auto;padding:0 16px}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
     .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(11,99,179,0.08);display:flex;flex-direction:column;align-items:center;text-align:center}
-    .card img{width:130px;height:130px;object-fit:contain;border-radius:8px;background:#fff;padding:6px}
-    .name{font-weight:700;margin-top:10px}
-    .type{font-size:13px;color:var(--muted);margin-top:6px}
-    .price{margin-top:8px;font-weight:700;color:var(--blue)}
+    .card img{width:130px;height:130px;object-fit:contain;border-radius:8px;background:#fff;padding:6px;border:1px solid #f0f0f0;}
+    .name{font-weight:700;margin-top:10px;font-size:15px;}
+    .type{font-size:13px;color:var(--muted);margin-top:6px;min-height:36px;}
+    .price{margin-top:8px;font-weight:700;color:var(--blue);font-size:14px;}
     .qty{margin-top:12px;display:flex;align-items:center;gap:8px}
-    .btn{background:var(--blue);color:#fff;border:none;padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer}
-    .qty button{width:36px;height:36px;border-radius:8px;border:1px solid #e6eefb;background:white;cursor:pointer}
-    .qty input{width:56px;text-align:center;border:1px solid #e6eefb;border-radius:8px;padding:8px}
+    .btn{background:var(--blue);color:#fff;border:none;padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer;width:100%;}
+    .qty button{width:36px;height:36px;border-radius:8px;border:1px solid #e6eefb;background:white;cursor:pointer;font-weight:bold;}
+    .qty input{width:56px;text-align:center;border:1px solid #e6eefb;border-radius:8px;padding:8px;font-size:14px;}
     footer{position:fixed;left:0;right:0;bottom:0;background:#fff;padding:12px;border-top:1px solid #eef3fb;display:flex;flex-direction:column;align-items:center;gap:10px}
     .summary{display:flex;flex-direction:column;align-items:center;gap:4px}
     .total{font-weight:800;font-size:18px;color:var(--blue)}
     form{display:flex;flex-direction:column;gap:8px;width:100%;max-width:400px;padding:8px}
     input,textarea,select{border:1px solid #e6eefb;border-radius:8px;padding:8px;width:100%;font-size:14px}
     textarea{resize:none;height:60px}
+    .loading{text-align:center;padding:20px;color:var(--muted)}
+    .error{text-align:center;padding:20px;color:#dc2626;background:#fef2f2;border-radius:8px;margin:10px}
     @media(max-width:520px){.card img{width:110px;height:110px}}
   </style>
 </head>
 <body>
   <header>
     <div>
-      <div class="brand">شركة دجلة للصناعات الدوائية</div>
+      <div class="brand">شركة دجلة للصناعات الدوائية/محافظة الديوانية</div>
       <div class="subtitle">اطلب عبر واتساب بسرعة وسهولة</div>
     </div>
   </header>
 
   <main class="container">
+    <div class="loading" id="loading">جاري تحميل المنتجات...</div>
+    <div class="error" id="error" style="display:none"></div>
     <section class="grid" id="products"></section>
   </main>
 
@@ -64,24 +68,92 @@
 
   <script>
     const WHATSAPP_NUMBER = '9647812374712';
+    
+    // بيانات المنتجات الافتراضية (كنسخة احتياطية إذا لم يعمل products.json)
+    const defaultProducts = [
+      {
+        "name": "باراسيتامول",
+        "type": "مسكن وأخاف للحرارة 500 مجم",
+        "price": 5000,
+        "image": "paracetamol.jpg"
+      },
+      {
+        "name": "أموكسيسيلين", 
+        "type": "مضاد حيوي 500 مجم",
+        "price": 8000,
+        "image": "amoxicillin.jpg"
+      },
+      {
+        "name": "ايبوبروفين",
+        "type": "مسكن ومضاد للالتهاب 400 مجم", 
+        "price": 6000,
+        "image": "ibuprofen.jpg"
+      },
+      {
+        "name": "فيتامين سي",
+        "type": "مكمل غذائي 1000 مجم",
+        "price": 4500,
+        "image": "vitamin-c.jpg"
+      },
+      {
+        "name": "أوميغا 3",
+        "type": "مكمل غذائي للقلب والمخ",
+        "price": 12000,
+        "image": "omega-3.jpg"
+      },
+      {
+        "name": "كريم مرطب",
+        "type": "للبشرة الجافة والحساسة",
+        "price": 7500,
+        "image": "moisturizer.jpg"
+      }
+    ];
 
     async function loadProducts() {
-      const response = await fetch('products.json');
-      const data = await response.json();
       const container = document.getElementById('products');
+      const loading = document.getElementById('loading');
+      const errorDiv = document.getElementById('error');
+      
+      let products = [];
+      
+      try {
+        // محاولة تحميل products.json
+        const response = await fetch('products.json');
+        if (response.ok) {
+          products = await response.json();
+          loading.style.display = 'none';
+        } else {
+          throw new Error('ملف products.json غير موجود');
+        }
+      } catch (err) {
+        // استخدام البيانات الافتراضية إذا فشل التحميل
+        products = defaultProducts;
+        loading.style.display = 'none';
+        errorDiv.style.display = 'block';
+        errorDiv.innerHTML = `
+          <strong>ملاحظة:</strong> يتم استخدام بيانات افتراضية. 
+          <br>لإضافة منتجاتك الحقيقية، أنشئ ملف products.json وأضف صور المنتجات في مجلد images/
+        `;
+      }
+      
       container.innerHTML = '';
-      data.forEach((item, index) => {
+      products.forEach((item, index) => {
         const card = document.createElement('article');
         card.className = 'card';
         card.dataset.id = index + 1;
         card.dataset.name = item.name;
         card.dataset.type = item.type;
         card.dataset.price = item.price;
+        
+        // صورة افتراضية إذا لم توجد الصورة
+        const imagePlaceholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9Ijc1IiB5PSI3NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5Ij7Yp9mE2YXYs9in2KEg2KfZhNi52YbYr9mKPC90ZXh0Pjwvc3ZnPg==';
+        
         card.innerHTML = `
-          <img src="images/${item.image}" alt="${item.name}" />
+          <img src="images/${item.image}" alt="${item.name}" 
+               onerror="this.src='${imagePlaceholder}'" />
           <div class="name">${item.name}</div>
           <div class="type">${item.type}</div>
-          <div class="price">سعر القطعة: <span>${item.price}</span> د.ع</div>
+          <div class="price">سعر القطعة: <span>${formatCurrency(item.price)}</span> د.ع</div>
           <div class="qty">
             <button class="dec">−</button>
             <input type="number" min="0" value="0" class="count" />
@@ -104,6 +176,7 @@
         inc.addEventListener('click',()=>{input.value=Math.max(0,Number(input.value||0)+1);recalc();});
         dec.addEventListener('click',()=>{input.value=Math.max(0,Number(input.value||0)-1);recalc();});
         input.addEventListener('change',()=>{if(Number(input.value)<0)input.value=0;recalc();});
+        input.addEventListener('input',()=>{if(Number(input.value)<0)input.value=0;recalc();});
       });
     }
 
@@ -127,27 +200,50 @@
 
       const items=[];let total=0;
       document.querySelectorAll('.card').forEach(card=>{
-        const n=card.dataset.name;const t=card.dataset.type;const p=Number(card.dataset.price);const q=Number(card.querySelector('.count').value||0);
-        if(q>0){items.push({n,t,p,q});total+=p*q;}
+        const n=card.dataset.name;
+        const t=card.dataset.type;
+        const p=Number(card.dataset.price);
+        const q=Number(card.querySelector('.count').value||0);
+        if(q>0){
+          items.push({n,t,p,q});
+          total+=p*q;
+        }
       });
 
-      if(items.length===0){alert('الرجاء اختيار كمية لمنتج واحد على الأقل قبل الإرسال.');return;}
-      if(!name||!phone){alert('الرجاء إدخال الاسم ورقم الهاتف.');return;}
+      if(items.length===0){
+        alert('الرجاء اختيار كمية لمنتج واحد على الأقل قبل الإرسال.');
+        return;
+      }
+      if(!name||!phone){
+        alert('الرجاء إدخال الاسم ورقم الهاتف.');
+        return;
+      }
 
-      let msg='طلب من شركة دجلة للصناعات الدوائية%0A';
+      let msg='📋 طلب من شركة دجلة للصناعات الدوائية%0A';
       msg+='------------------------------%0A';
-      items.forEach(it=>{msg+=`${it.n} (${it.t}) - الكمية: ${it.q} - السعر للوحدة: ${it.p} د.ع%0A`;});
+      items.forEach(it=>{
+        msg+=`🟢 ${it.n}%0A`;
+        msg+=`📦 ${it.t}%0A`;
+        msg+=`🔢 الكمية: ${it.q}%0A`;
+        msg+=`💰 السعر للوحدة: ${formatCurrency(it.p)} د.ع%0A`;
+        msg+=`💵 الإجمالي: ${formatCurrency(it.p * it.q)} د.ع%0A%0A`;
+      });
       msg+='------------------------------%0A';
-      msg+=`الإجمالي: ${total} د.ع%0A%0A`;
-      msg+=`الاسم: ${name}%0Aرقم الهاتف: ${phone}%0Aالعنوان: ${address||'—'}%0Aطريقة الدفع: ${payment}%0A`;
-      if(notes) msg+=`ملاحظات: ${notes}%0A`;
+      msg+=`💰 الإجمالي الكلي: ${formatCurrency(total)} د.ع%0A%0A`;
+      msg+=`📋 معلومات العميل:%0A`;
+      msg+=`🏢 الاسم: ${name}%0A`;
+      msg+=`📞 رقم الهاتف: ${phone}%0A`;
+      msg+=`📍 العنوان: ${address||'—'}%0A`;
+      msg+=`💳 طريقة الدفع: ${payment}%0A`;
+      if(notes) msg+=`📝 ملاحظات: ${notes}%0A`;
+      msg+='%0Aشكراً لتعاملكم مع شركة دجلة للصناعات الدوائية 🏥';
 
       const waLink=`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
       window.open(waLink,'_blank');
     });
 
+    // تحميل المنتجات عند بدء التشغيل
     loadProducts();
   </script>
 </body>
 </html>
-
