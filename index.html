@@ -12,6 +12,13 @@
     .brand{font-size:18px;font-weight:700}
     .subtitle{font-size:13px;opacity:.95}
     .container{max-width:980px;margin:20px auto;padding:0 16px}
+    
+    /* حقل العروض البسيط */
+    .offer-banner{background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:white;padding:15px 20px;border-radius:12px;margin-bottom:25px;text-align:center;box-shadow:0 4px 15px rgba(255,107,107,0.3);border:2px solid #ff9f43;}
+    .offer-title{font-size:20px;font-weight:800;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:10px;}
+    .offer-content{font-size:16px;line-height:1.5;font-weight:500;}
+    .offer-icon{font-size:24px;}
+    
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
     .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(11,99,179,0.08);display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:transform 0.2s ease;}
     .card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(11,99,179,0.12)}
@@ -30,7 +37,6 @@
     input,textarea,select{border:1px solid #e6eefb;border-radius:8px;padding:8px;width:100%;font-size:14px}
     textarea{resize:none;height:60px}
     .loading{text-align:center;padding:20px;color:var(--muted)}
-    .error{text-align:center;padding:20px;color:#dc2626;background:#fef2f2;border-radius:8px;margin:10px}
     
     /* نمط البطاقة الموسعة */
     .overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
@@ -52,6 +58,8 @@
       .expanded-card{padding:20px;}
       .expanded-image{width:150px;height:150px;}
       .expanded-name{font-size:20px;}
+      .offer-title{font-size:18px;}
+      .offer-content{font-size:14px;}
     }
   </style>
 </head>
@@ -64,8 +72,18 @@
   </header>
 
   <main class="container">
+    <!-- حقل العروض البسيط -->
+    <div class="offer-banner" id="offerBanner">
+      <div class="offer-title">
+        <span class="offer-icon">🎁</span>
+        العروض الحالية
+      </div>
+      <div class="offer-content" id="offerContent">
+        <!-- سيتم تعبئة النص هنا -->
+      </div>
+    </div>
+
     <div class="loading" id="loading">جاري تحميل المنتجات...</div>
-    <div class="error" id="error" style="display:none"></div>
     <section class="grid" id="products"></section>
   </main>
 
@@ -96,7 +114,6 @@
       <input type="text" id="custName" placeholder="اسم الصيدلية " required>
       <input type="tel" id="custPhone" placeholder="رقم الهاتف" required>
       <input type="text" id="custAddress" placeholder="العنوان" />
-      <!-- تم إخفاء حقل طريقة الدفع -->
       <textarea id="custNotes" placeholder="ملاحظات التجهيز (اسم المذخر)"></textarea>
       <button type="button" class="btn" id="send">إرسال الطلب عبر واتساب</button>
     </form>
@@ -106,6 +123,20 @@
     const WHATSAPP_NUMBER = '9647812374712';
     let currentExpandedCard = null;
     
+    // نص العرض الحالي - يمكنك تعديل هذا النص بسهولة
+    const currentOfferText = "عرض الكوتا الذهبية: استثمارك ينمو 10 أضعاف استغل الآن... وفّر أكثر\n\nعندما يصل إجمالي قيمة طلبية الشراء الواحدة من الأدوية إلى مليون دينار عراقي، ستحصل فورًا على أدوية إضافية مجانية بقيمة لا تقل عن 10% من قيمة مشترياتك\n\nبمعنى آخر على كل مليون دينار تنفقه، تحصل على ما قيمته 100,000 دينار من الأدوية مجانًا. هذا ليس مجرد خصم، بل هو زيادة فعلية في مخزونك وأرباحك";
+
+    // دالة لعرض نص العرض
+    function loadOffer() {
+      const offerContent = document.getElementById('offerContent');
+      offerContent.textContent = currentOfferText;
+      
+      // إخفاء البانر إذا لم يكن هناك عرض
+      if (!currentOfferText || currentOfferText.trim() === '') {
+        document.getElementById('offerBanner').style.display = 'none';
+      }
+    }
+
     // دالة لتحويل الامتداد من .img إلى .jpg
     function convertImageExtension(imageName) {
       return imageName.replace('.img', '.jpg').replace('.IMG', '.jpg');
@@ -114,25 +145,15 @@
     async function loadProducts() {
       const container = document.getElementById('products');
       const loading = document.getElementById('loading');
-      const errorDiv = document.getElementById('error');
       
       let products = [];
       
       try {
         const response = await fetch('products.json');
-        if (response.ok) {
-          products = await response.json();
-          loading.textContent = 'جاري تحميل المنتجات...';
-        } else {
-          throw new Error('ملف products.json غير موجود');
-        }
+        products = await response.json();
       } catch (err) {
         products = [];
-        errorDiv.style.display = 'block';
-        errorDiv.innerHTML = `
-          <strong>خطأ في التحميل:</strong> ${err.message}
-          <br>الرجاء التأكد من وجود ملف products.json
-        `;
+        console.error('فشل تحميل المنتجات');
       }
       
       container.innerHTML = '';
@@ -155,7 +176,7 @@
         card.dataset.price = item.price;
         card.dataset.image = imageUrl;
         
-        const placeholderImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9Ijc1IiB5PSI3NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5Ij7Yp9mE2YXYs9in2KEg2KfZhNi52YbYr9mKPC90ZXh0Pjwvc3ZnPg==';
+        const placeholderImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9Ijc1IiB5PSI3NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5Ij7Yp9mE2LXZiNix2Kkg2LrZitixINmF2KrZiNmB2LHYqTwvdGV4dD48L3N2Zz4=';
         
         card.innerHTML = `
           <img src="${imageUrl}" alt="${item.name}" 
@@ -202,7 +223,6 @@
       currentExpandedCard = card;
       overlay.style.display = 'flex';
       
-      // إضافة event listeners للكمية في البطاقة الموسعة
       const incExpanded = document.querySelector('.inc-expanded');
       const decExpanded = document.querySelector('.dec-expanded');
       
@@ -219,14 +239,12 @@
       };
     }
 
-    // دالة لإغلاق البطاقة الموسعة
     function closeExpandedCard() {
       const overlay = document.getElementById('overlay');
       overlay.style.display = 'none';
       currentExpandedCard = null;
     }
 
-    // دالة لإضافة الكمية من البطاقة الموسعة إلى البطاقة الأصلية
     function addToCartFromExpanded() {
       if (currentExpandedCard) {
         const expandedCount = document.getElementById('expandedCount');
@@ -243,10 +261,8 @@
       const overlay = document.getElementById('overlay');
       const addToCartBtn = document.getElementById('addToCart');
       
-      // إضافة حدث النقر للبطاقات
       cards.forEach(card => {
         card.addEventListener('click', (e) => {
-          // منع فتح البطاقة الموسعة عند النقر على أزرار الكمية
           if (!e.target.classList.contains('dec') && 
               !e.target.classList.contains('inc') && 
               !e.target.classList.contains('count')) {
@@ -254,7 +270,6 @@
           }
         });
         
-        // أحداث أزرار الكمية في البطاقات الصغيرة
         const inc = card.querySelector('.inc');
         const dec = card.querySelector('.dec');
         const input = card.querySelector('.count');
@@ -282,18 +297,15 @@
         });
       });
       
-      // أحداث البطاقة الموسعة
       closeBtn.addEventListener('click', closeExpandedCard);
       addToCartBtn.addEventListener('click', addToCartFromExpanded);
       
-      // إغلاق البطاقة الموسعة عند النقر خارجها
       overlay.addEventListener('click', (e) => {
         if (e.target === overlay) {
           closeExpandedCard();
         }
       });
       
-      // إغلاق البطاقة الموسعة بالزر Escape
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && overlay.style.display === 'flex') {
           closeExpandedCard();
@@ -318,6 +330,18 @@
       const address=document.getElementById('custAddress').value.trim();
       const notes=document.getElementById('custNotes').value.trim();
 
+      // التحقق من صحة رقم الهاتف
+      if(!/^(\+?964|0)?7[0-9]{9}$/.test(phone.replace(/\s/g, ''))) {
+        alert('الرجاء إدخال رقم هاتف عراقي صحيح');
+        return;
+      }
+
+      // التحقق من اسم الصيدلية
+      if(name.length < 3) {
+        alert('الرجاء إدخال اسم صيدلية صحيح');
+        return;
+      }
+
       const items=[];let total=0;
       document.querySelectorAll('.card').forEach(card=>{
         const n=card.dataset.name;
@@ -331,7 +355,7 @@
       });
 
       if(items.length===0){
-        alert('الرجاء اختيار كمية لمنتج واحد على الأقل قبل الإرسال.');
+        alert('لم يتم إضافة أي منتجات للطلب. الرجاء اختيار المنتجات وتحديد الكميات المطلوبة قبل إرسال الطلب.');
         return;
       }
       if(!name||!phone){
@@ -339,29 +363,30 @@
         return;
       }
 
-      let msg='📋 طلب من شركة دجلة للصناعات الدوائية%0A';
+      let msg='طلب من شركة دجلة للصناعات الدوائية%0A';
       msg+='------------------------------%0A';
       items.forEach(it=>{
-        msg+=`🟢 ${it.n}%0A`;
-        msg+=`📦 ${it.t}%0A`;
-        msg+=`🔢 الكمية: ${it.q}%0A`;
-        msg+=`💰 السعر للوحدة: ${formatCurrency(it.p)} د.ع%0A`;
-        msg+=`💵 الإجمالي: ${formatCurrency(it.p * it.q)} د.ع%0A%0A`;
+        msg+=`${it.n}%0A`;
+        msg+=`${it.t}%0A`;
+        msg+=`الكمية: ${it.q}%0A`;
+        msg+=`السعر للوحدة: ${formatCurrency(it.p)} د.ع%0A`;
+        msg+=`الإجمالي: ${formatCurrency(it.p * it.q)} د.ع%0A%0A`;
       });
       msg+='------------------------------%0A';
-      msg+=`💰 الإجمالي الكلي: ${formatCurrency(total)} د.ع%0A%0A`;
-      msg+=`📋 معلومات العميل:%0A`;
-      msg+=`🏢 الاسم: ${name}%0A`;
-      msg+=`📞 رقم الهاتف: ${phone}%0A`;
-      msg+=`📍 العنوان: ${address||'—'}%0A`;
-      if(notes) msg+=`📝 ملاحظات: ${notes}%0A`;
-      msg+='%0Aشكراً لتعاملكم مع شركة دجلة للصناعات الدوائية 🏥';
+      msg+=`الإجمالي الكلي: ${formatCurrency(total)} د.ع%0A%0A`;
+      msg+=`معلومات العميل:%0A`;
+      msg+=`الاسم: ${name}%0A`;
+      msg+=`رقم الهاتف: ${phone}%0A`;
+      msg+=`العنوان: ${address||'—'}%0A`;
+      if(notes) msg+=`ملاحظات: ${notes}%0A`;
+      msg+='%0Aشكراً لتعاملكم مع شركة دجلة للصناعات الدوائية';
 
       const waLink=`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
       window.open(waLink,'_blank');
     });
 
-    // تحميل المنتجات عند بدء التشغيل
+    // تحميل العرض والمنتجات عند بدء التشغيل
+    loadOffer();
     loadProducts();
   </script>
 </body>
