@@ -95,6 +95,108 @@
       box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
     }
     
+    /* الزر العائم المحسن */
+    .floating-order-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 50px;
+      box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+      border: none;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 999;
+      transition: all 0.3s ease;
+      animation: pulse 2s infinite;
+    }
+    .floating-order-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(37, 211, 102, 0.6);
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .whatsapp-icon {
+      font-size: 24px;
+    }
+    
+    /* نموذج اكمال الطلب */
+    .order-form-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+      padding: 20px;
+    }
+    
+    .order-form-container {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    
+    .form-close-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .form-close-btn:hover {
+      background: #f5f5f5;
+    }
+    
+    .form-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--blue);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .form-summary {
+      background: var(--light);
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .total-amount {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--blue);
+    }
+    
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
     .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(11,99,179,0.08);display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:transform 0.2s ease;}
     .card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(11,99,179,0.12)}
@@ -103,15 +205,13 @@
     .type{font-size:13px;color:var(--muted);margin-top:6px;min-height:36px;}
     .price{margin-top:8px;font-weight:700;color:var(--blue);font-size:14px;}
     .qty{margin-top:12px;display:flex;align-items:center;gap:8px}
-    .btn{background:var(--blue);color:#fff;border:none;padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer;width:100%;}
+    .btn{background:var(--blue);color:#fff;border:none;padding:12px 20px;border-radius:8px;font-weight:700;cursor:pointer;width:100%;font-size:16px;}
     .qty button{width:36px;height:36px;border-radius:8px;border:1px solid #e6eefb;background:white;cursor:pointer;font-weight:bold;}
     .qty input{width:56px;text-align:center;border:1px solid #e6eefb;border-radius:8px;padding:8px;font-size:14px;}
-    footer{position:fixed;left:0;right:0;bottom:0;background:#fff;padding:12px;border-top:1px solid #eef3fb;display:flex;flex-direction:column;align-items:center;gap:10px}
-    .summary{display:flex;flex-direction:column;align-items:center;gap:4px}
-    .total{font-weight:800;font-size:18px;color:var(--blue)}
-    form{display:flex;flex-direction:column;gap:8px;width:100%;max-width:400px;padding:8px}
-    input,textarea,select{border:1px solid #e6eefb;border-radius:8px;padding:8px;width:100%;font-size:14px}
-    textarea{resize:none;height:60px}
+    
+    form{display:flex;flex-direction:column;gap:12px;width:100%;}
+    input,textarea,select{border:1px solid #e6eefb;border-radius:8px;padding:12px;width:100%;font-size:14px}
+    textarea{resize:none;height:80px}
     .loading{text-align:center;padding:20px;color:var(--muted)}
     
     /* نمط البطاقة الموسعة */
@@ -137,6 +237,15 @@
       .offer-title{font-size:20px;}
       .offer-content{font-size:16px; padding: 12px;}
       .offer-badge{left: 10px; padding: 6px 12px; font-size: 12px;}
+      .floating-order-btn {
+        bottom: 15px;
+        left: 15px;
+        padding: 14px 18px;
+        font-size: 14px;
+      }
+      .order-form-container {
+        padding: 20px;
+      }
     }
   </style>
 </head>
@@ -166,6 +275,33 @@
     <section class="grid" id="products"></section>
   </main>
 
+  <!-- الزر العائم -->
+  <button class="floating-order-btn" id="floatingOrderBtn">
+    <span class="whatsapp-icon">📱</span>
+    اكمال الطلب
+  </button>
+
+  <!-- نموذج اكمال الطلب -->
+  <div class="order-form-overlay" id="orderFormOverlay">
+    <div class="order-form-container">
+      <button class="form-close-btn" id="formCloseBtn">×</button>
+      <h2 class="form-title">اكمال الطلب</h2>
+      
+      <div class="form-summary">
+        <div>إجمالي الطلب</div>
+        <div class="total-amount" id="formTotal">0 د.ع</div>
+      </div>
+
+      <form id="customer-info">
+        <input type="text" id="custName" placeholder="اسم الصيدلية " required>
+        <input type="tel" id="custPhone" placeholder="رقم الهاتف" required>
+        <input type="text" id="custAddress" placeholder="العنوان" />
+        <textarea id="custNotes" placeholder="ملاحظات التجهيز (اسم المذخر)"></textarea>
+        <button type="button" class="btn" id="sendOrder">إرسال الطلب عبر واتساب</button>
+      </form>
+    </div>
+  </div>
+
   <!-- البطاقة الموسعة -->
   <div class="overlay" id="overlay">
     <div class="expanded-card" id="expandedCard">
@@ -182,21 +318,6 @@
       <button class="add-to-cart" id="addToCart">إضافة إلى الطلب</button>
     </div>
   </div>
-
-  <footer>
-    <div class="summary">
-      <div>إجمالي الطلب</div>
-      <div class="total" id="total">0 د.ع</div>
-    </div>
-
-    <form id="customer-info">
-      <input type="text" id="custName" placeholder="اسم الصيدلية " required>
-      <input type="tel" id="custPhone" placeholder="رقم الهاتف" required>
-      <input type="text" id="custAddress" placeholder="العنوان" />
-      <textarea id="custNotes" placeholder="ملاحظات التجهيز (اسم المذخر)"></textarea>
-      <button type="button" class="btn" id="send">إرسال الطلب عبر واتساب</button>
-    </form>
-  </footer>
 
   <script>
     const WHATSAPP_NUMBER = '9647812374712';
@@ -341,76 +462,28 @@
       }
     }
 
-    function attachEvents(){
-      const cards = document.querySelectorAll('.card');
-      const closeBtn = document.getElementById('closeBtn');
-      const overlay = document.getElementById('overlay');
-      const addToCartBtn = document.getElementById('addToCart');
-      
-      cards.forEach(card => {
-        card.addEventListener('click', (e) => {
-          if (!e.target.classList.contains('dec') && 
-              !e.target.classList.contains('inc') && 
-              !e.target.classList.contains('count')) {
-            expandCard(card);
-          }
-        });
-        
-        const inc = card.querySelector('.inc');
-        const dec = card.querySelector('.dec');
-        const input = card.querySelector('.count');
-        
-        inc.addEventListener('click', (e) => {
-          e.stopPropagation();
-          input.value = Math.max(0, Number(input.value || 0) + 1);
-          recalc();
-        });
-        
-        dec.addEventListener('click', (e) => {
-          e.stopPropagation();
-          input.value = Math.max(0, Number(input.value || 0) - 1);
-          recalc();
-        });
-        
-        input.addEventListener('change', () => {
-          if (Number(input.value) < 0) input.value = 0;
-          recalc();
-        });
-        
-        input.addEventListener('input', () => {
-          if (Number(input.value) < 0) input.value = 0;
-          recalc();
-        });
-      });
-      
-      closeBtn.addEventListener('click', closeExpandedCard);
-      addToCartBtn.addEventListener('click', addToCartFromExpanded);
-      
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-          closeExpandedCard();
-        }
-      });
-      
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && overlay.style.display === 'flex') {
-          closeExpandedCard();
-        }
-      });
+    // دالة فتح نموذج الطلب
+    function openOrderForm() {
+      const orderForm = document.getElementById('orderFormOverlay');
+      orderForm.style.display = 'flex';
+      updateFormTotal();
     }
 
-    function recalc(){
-      let total=0;
-      document.querySelectorAll('.card').forEach(card=>{
-        const price=Number(card.dataset.price);
-        const qty=Number(card.querySelector('.count').value||0);
-        total+=price*qty;
-      });
-      document.getElementById('total').textContent=total===0?'0 د.ع':formatCurrency(total)+' د.ع';
-      return total;
+    // دالة إغلاق نموذج الطلب
+    function closeOrderForm() {
+      const orderForm = document.getElementById('orderFormOverlay');
+      orderForm.style.display = 'none';
     }
 
-    document.getElementById('send').addEventListener('click', async ()=>{
+    // دالة تحديث المجموع في النموذج
+    function updateFormTotal() {
+      const formTotal = document.getElementById('formTotal');
+      const total = recalc();
+      formTotal.textContent = formatCurrency(total) + ' د.ع';
+    }
+
+    // دالة إرسال الطلب
+    function sendOrder() {
       const name=document.getElementById('custName').value.trim();
       const phone=document.getElementById('custPhone').value.trim();
       const address=document.getElementById('custAddress').value.trim();
@@ -498,8 +571,113 @@ ${items.map((it, index) =>
           const thanksLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(thankMsg)}`;
           window.open(thanksLink, '_blank');
         }, 2000);
+        
+        // إغلاق النموذج بعد الإرسال
+        closeOrderForm();
+        
+        // تفريغ الحقول
+        document.getElementById('custName').value = '';
+        document.getElementById('custPhone').value = '';
+        document.getElementById('custAddress').value = '';
+        document.getElementById('custNotes').value = '';
       }
-    });
+    }
+
+    function attachEvents(){
+      const cards = document.querySelectorAll('.card');
+      const closeBtn = document.getElementById('closeBtn');
+      const overlay = document.getElementById('overlay');
+      const addToCartBtn = document.getElementById('addToCart');
+      const floatingOrderBtn = document.getElementById('floatingOrderBtn');
+      const formCloseBtn = document.getElementById('formCloseBtn');
+      const sendOrderBtn = document.getElementById('sendOrder');
+      
+      // حدث الزر العائم
+      floatingOrderBtn.addEventListener('click', openOrderForm);
+      
+      // حدث إغلاق النموذج
+      formCloseBtn.addEventListener('click', closeOrderForm);
+      
+      // حدث زر الإرسال في النموذج
+      sendOrderBtn.addEventListener('click', sendOrder);
+      
+      // إغلاق النموذج عند النقر خارج المحتوى
+      document.getElementById('orderFormOverlay').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('orderFormOverlay')) {
+          closeOrderForm();
+        }
+      });
+      
+      cards.forEach(card => {
+        card.addEventListener('click', (e) => {
+          if (!e.target.classList.contains('dec') && 
+              !e.target.classList.contains('inc') && 
+              !e.target.classList.contains('count')) {
+            expandCard(card);
+          }
+        });
+        
+        const inc = card.querySelector('.inc');
+        const dec = card.querySelector('.dec');
+        const input = card.querySelector('.count');
+        
+        inc.addEventListener('click', (e) => {
+          e.stopPropagation();
+          input.value = Math.max(0, Number(input.value || 0) + 1);
+          recalc();
+          updateFormTotal();
+        });
+        
+        dec.addEventListener('click', (e) => {
+          e.stopPropagation();
+          input.value = Math.max(0, Number(input.value || 0) - 1);
+          recalc();
+          updateFormTotal();
+        });
+        
+        input.addEventListener('change', () => {
+          if (Number(input.value) < 0) input.value = 0;
+          recalc();
+          updateFormTotal();
+        });
+        
+        input.addEventListener('input', () => {
+          if (Number(input.value) < 0) input.value = 0;
+          recalc();
+          updateFormTotal();
+        });
+      });
+      
+      closeBtn.addEventListener('click', closeExpandedCard);
+      addToCartBtn.addEventListener('click', addToCartFromExpanded);
+      
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          closeExpandedCard();
+        }
+      });
+      
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (overlay.style.display === 'flex') {
+            closeExpandedCard();
+          }
+          if (document.getElementById('orderFormOverlay').style.display === 'flex') {
+            closeOrderForm();
+          }
+        }
+      });
+    }
+
+    function recalc(){
+      let total=0;
+      document.querySelectorAll('.card').forEach(card=>{
+        const price=Number(card.dataset.price);
+        const qty=Number(card.querySelector('.count').value||0);
+        total+=price*qty;
+      });
+      return total;
+    }
 
     // تحميل العرض والمنتجات عند بدء التشغيل
     loadOffer();
