@@ -234,7 +234,8 @@
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
     .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(11,99,179,0.08);display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:transform 0.2s ease;}
     .card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(11,99,179,0.12)}
-    .card img{width:130px;height:130px;object-fit:contain;border-radius:8px;background:#fff;padding:6px;border:1px solid #f0f0f0;}
+    .card img{width:130px;height:130px;object-fit:contain;border-radius:8px;background:#fff;padding:6px;border:1px solid #f0f0f0;cursor:zoom-in;transition:transform 0.3s ease;}
+    .card img:hover{transform:scale(1.05);}
     .name{font-weight:700;margin-top:10px;font-size:15px;}
     .type{font-size:13px;color:var(--muted);margin-top:6px;min-height:36px;}
     .price{margin-top:8px;font-weight:700;color:var(--blue);font-size:14px;}
@@ -256,7 +257,7 @@
     .expanded-card{background:white;border-radius:20px;padding:30px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;position:relative;text-align:center;}
     .close-btn{position:absolute;top:15px;left:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#666;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
     .close-btn:hover{background:#f5f5f5;}
-    .expanded-image{width:200px;height:200px;object-fit:contain;margin-bottom:20px;}
+    .expanded-image{width:200px;height:200px;object-fit:contain;margin-bottom:20px;cursor:pointer;}
     .expanded-name{font-size:24px;font-weight:700;color:#333;margin-bottom:10px;}
     .expanded-type{font-size:16px;color:var(--muted);margin-bottom:15px;}
     .expanded-price{font-size:20px;font-weight:700;color:var(--blue);margin-bottom:20px;}
@@ -265,6 +266,80 @@
     .expanded-qty input{width:80px;height:50px;text-align:center;border:2px solid #e6eefb;border-radius:12px;font-size:18px;font-weight:bold;}
     .add-to-cart{background:var(--blue);color:white;border:none;padding:15px 30px;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px;width:100%;}
     .add-to-cart:hover{background:#0a5aa3;}
+    
+    /* نافذة تكبير الصورة */
+    .image-zoom-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1003;
+      padding: 20px;
+    }
+    
+    .image-zoom-container {
+      position: relative;
+      max-width: 90%;
+      max-height: 90%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .zoomed-image {
+      max-width: 100%;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 10px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+    
+    .zoom-close-btn {
+      position: absolute;
+      top: -50px;
+      left: 0;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s ease;
+    }
+    
+    .zoom-close-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    
+    .image-info {
+      position: absolute;
+      bottom: -60px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: white;
+    }
+    
+    .image-name {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .image-type {
+      font-size: 16px;
+      opacity: 0.8;
+    }
     
     @media(max-width:768px){
       .order-form-container {
@@ -285,6 +360,21 @@
       }
       .total-amount {
         font-size: 28px;
+      }
+      .zoomed-image {
+        max-width: 95%;
+        max-height: 85vh;
+      }
+      .zoom-close-btn {
+        top: -45px;
+        width: 45px;
+        height: 45px;
+      }
+      .image-info {
+        bottom: -50px;
+      }
+      .image-name {
+        font-size: 18px;
       }
     }
     
@@ -310,6 +400,25 @@
       }
       .order-total {
         font-size: 12px;
+      }
+      .zoomed-image {
+        max-width: 98%;
+        max-height: 80vh;
+      }
+      .zoom-close-btn {
+        top: -40px;
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+      }
+      .image-info {
+        bottom: -45px;
+      }
+      .image-name {
+        font-size: 16px;
+      }
+      .image-type {
+        font-size: 14px;
       }
     }
   </style>
@@ -347,6 +456,18 @@
     <span class="order-count-badge" id="orderCountBadge">0</span>
     اكمال الطلب
   </button>
+
+  <!-- نافذة تكبير الصورة -->
+  <div class="image-zoom-overlay" id="imageZoomOverlay">
+    <div class="image-zoom-container">
+      <button class="zoom-close-btn" id="zoomCloseBtn">×</button>
+      <img class="zoomed-image" id="zoomedImage" src="" alt="">
+      <div class="image-info">
+        <div class="image-name" id="zoomedImageName"></div>
+        <div class="image-type" id="zoomedImageType"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- نموذج اكمال الطلب على عرض الشاشة -->
   <div class="order-form-overlay" id="orderFormOverlay">
@@ -397,7 +518,7 @@
   <div class="overlay" id="overlay">
     <div class="expanded-card" id="expandedCard">
       <button class="close-btn" id="closeBtn">×</button>
-      <img class="expanded-image" id="expandedImage" src="" alt="">
+      <img class="expanded-image" id="expandedImage" src="" alt="" onclick="zoomImage(this.src, this.alt)">
       <div class="expanded-name" id="expandedName"></div>
       <div class="expanded-type" id="expandedType"></div>
       <div class="expanded-price" id="expandedPrice"></div>
@@ -423,6 +544,32 @@
 → <span class="offer-highlight">زيادة فعلية في أرباحك</span> وليس مجرد خصم!
 
 💎 <span class="offer-highlight">استغل الفرصة الآن</span> - العرض لفترة محدودة`;
+
+    // دالة تكبير الصورة
+    function zoomImage(imageSrc, imageAlt) {
+      const zoomOverlay = document.getElementById('imageZoomOverlay');
+      const zoomedImage = document.getElementById('zoomedImage');
+      const zoomedImageName = document.getElementById('zoomedImageName');
+      const zoomedImageType = document.getElementById('zoomedImageType');
+      
+      zoomedImage.src = imageSrc;
+      zoomedImage.alt = imageAlt;
+      
+      // استخراج اسم ونوع المنتج من البطاقة الموسعة
+      const productName = document.getElementById('expandedName').textContent;
+      const productType = document.getElementById('expandedType').textContent;
+      
+      zoomedImageName.textContent = productName;
+      zoomedImageType.textContent = productType;
+      
+      zoomOverlay.style.display = 'flex';
+    }
+
+    // دالة إغلاق تكبير الصورة
+    function closeImageZoom() {
+      const zoomOverlay = document.getElementById('imageZoomOverlay');
+      zoomOverlay.style.display = 'none';
+    }
 
     // دالة لعرض نص العرض
     function loadOffer() {
@@ -478,7 +625,8 @@
         
         card.innerHTML = `
           <img src="${imageUrl}" alt="${item.name}" 
-               onerror="this.src='${placeholderImage}'" />
+               onerror="this.src='${placeholderImage}'"
+               onclick="zoomCardImage('${imageUrl}', '${item.name}', '${item.type}')" />
           <div class="name">${item.name}</div>
           <div class="type">${item.type}</div>
           <div class="price">سعر القطعة: <span>${formatCurrency(item.price)}</span> د.ع</div>
@@ -493,6 +641,21 @@
       loading.style.display = 'none';
       attachEvents();
       recalc();
+    }
+
+    // دالة تكبير صورة البطاقة
+    function zoomCardImage(imageSrc, productName, productType) {
+      const zoomOverlay = document.getElementById('imageZoomOverlay');
+      const zoomedImage = document.getElementById('zoomedImage');
+      const zoomedImageName = document.getElementById('zoomedImageName');
+      const zoomedImageType = document.getElementById('zoomedImageType');
+      
+      zoomedImage.src = imageSrc;
+      zoomedImage.alt = productName;
+      zoomedImageName.textContent = productName;
+      zoomedImageType.textContent = productType;
+      
+      zoomOverlay.style.display = 'flex';
     }
 
     function formatCurrency(n){return n.toLocaleString('en-US');}
@@ -539,6 +702,7 @@
       const currentQty = card.querySelector('.count').value;
       
       expandedImage.src = image;
+      expandedImage.alt = name;
       expandedName.textContent = name;
       expandedType.textContent = type;
       expandedPrice.textContent = `سعر القطعة: ${formatCurrency(price)} د.ع`;
@@ -723,6 +887,7 @@ ${items.map((it, index) =>
       const floatingOrderBtn = document.getElementById('floatingOrderBtn');
       const formCloseBtn = document.getElementById('formCloseBtn');
       const sendOrderBtn = document.getElementById('sendOrder');
+      const zoomCloseBtn = document.getElementById('zoomCloseBtn');
       
       // حدث الزر العائم
       floatingOrderBtn.addEventListener('click', openOrderForm);
@@ -733,11 +898,22 @@ ${items.map((it, index) =>
       // حدث زر الإرسال في النموذج
       sendOrderBtn.addEventListener('click', sendOrder);
       
+      // حدث إغلاق تكبير الصورة
+      zoomCloseBtn.addEventListener('click', closeImageZoom);
+      
+      // إغلاق تكبير الصورة عند النقر خارجها
+      document.getElementById('imageZoomOverlay').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('imageZoomOverlay')) {
+          closeImageZoom();
+        }
+      });
+      
       cards.forEach(card => {
         card.addEventListener('click', (e) => {
           if (!e.target.classList.contains('dec') && 
               !e.target.classList.contains('inc') && 
-              !e.target.classList.contains('count')) {
+              !e.target.classList.contains('count') &&
+              e.target.tagName !== 'IMG') {
             expandCard(card);
           }
         });
@@ -789,6 +965,9 @@ ${items.map((it, index) =>
           }
           if (document.getElementById('orderFormOverlay').style.display === 'block') {
             closeOrderForm();
+          }
+          if (document.getElementById('imageZoomOverlay').style.display === 'flex') {
+            closeImageZoom();
           }
         }
       });
