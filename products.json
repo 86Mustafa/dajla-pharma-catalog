@@ -237,13 +237,13 @@
         "name": "Nastocord /(باكيت)",
         "type": "ointment",
         "price": 785,
-        "image": "Nastocord1.jpg"
+        "image": "Nastocord111.jpg"
     },
     {
         "name": "Nastocord /(بدون)",
         "type": "ointment",
         "price": 750,
-        "image": "Nastocord2.jpg"
+        "image": "Nastocord222.jpg"
     },
     {
         "name": "Quderm/  (باكيت)",
@@ -351,7 +351,7 @@
         "name": "Coldin-D/(بدون)",
         "type": "syrup",
         "price": 590,
-        "image": "Coldin1.jpg"
+        "image": "Coldin2.jpg"
     },
     {
         "name": "Dij-Exdile/(باكيت)",
