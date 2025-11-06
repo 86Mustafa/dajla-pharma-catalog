@@ -33,7 +33,7 @@
         "name": "DR- STELABIDZ ",
         "type": "tab",
         "price": 178,
-        "image": "STELABIDZ.jpg"
+        "image": "STELABIDZ .jpg"
     },
     {
         "name": "SPASMOBAN باكيت",
@@ -151,9 +151,33 @@
     },
     {
         "name": "Dormadiem/ (بدون)",
+        "type": "ointment",
+        "price": 365,
+        "image": "Dormadiem2.jpg"
+    },
+    {
+        "name": "Dormadiem/ 25g (باكيت)",
+        "type": "ointment",
+        "price": 437,
+        "image": "Dormadiem4.jpg"
+    },
+    {
+        "name": "Dormadiem/ (بدون)",
         "type": "cream",
         "price": 355,
         "image": "Dormadiem1.jpg"
+    },
+    {
+        "name": "Dormadiem/ 25g (باكيت)",
+        "type": "cream",
+        "price": 389,
+        "image": "Dormadiem3.jpg"
+    },
+    {
+        "name": "Dormocalmin/(بدون)",
+        "type": "cream",
+        "price": 480,
+        "image": "Dormocalmin2.jpg"
     },
     {
         "name": "Dormocalmin/(باكيت)",
@@ -166,12 +190,6 @@
         "type": "cream",
         "price": 420,
         "image": "Betnozam4.jpg"
-    },
-    {
-        "name": "Dormadiem/  ",
-        "type": "ointment",
-        "price": 365,
-        "image": "Dormadiem2.jpg"
     },
     {
         "name": "Dr-cetramex/ (باكيت)",
@@ -294,24 +312,6 @@
         "image": "Betnozum1g.jpg"
     },
     {
-        "name": "Dormadiem/ 25g (بدون)",
-        "type": "cream",
-        "price": 389,
-        "image": "Dormadiem3.jpg"
-    },
-    {
-        "name": "Dormadiem/ 25g((باكيت",
-        "type": "ointment",
-        "price": 437,
-        "image": "Dormadiem4.jpg"
-    },
-    {
-        "name": "Dormocalmin/(بدون)",
-        "type": "cream",
-        "price": 480,
-        "image": "Dormocalmin2.jpg"
-    },
-    {
         "name": "Sodium fusidate ((باكيت",
         "type": "ointment",
         "price": 1050,
@@ -375,7 +375,7 @@
         "name": "Dixon-D/(بدون)",
         "type": "syrup",
         "price": 385,
-        "image": "Dixon1.jpg"
+        "image": "Dixon2.jpg"
     },
     {
         "name": "Dr-Actifeedz/(باكيت)",
@@ -510,4 +510,3 @@
         "image": "Panadolz_infant.jpg"
     }
 ]
-
