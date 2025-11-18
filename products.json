@@ -2,7 +2,7 @@
     {
         "name": "PARASTOL-D 500mg ",
         "type": "tab",
-        "price": 165,
+        "price": 180,
         "image": "PARASTOL.jpg"
     },
     {
@@ -14,7 +14,7 @@
     {
         "name": "DITRAZOLE – 500 ",
         "type": "tab",
-        "price": 275,
+        "price": 295,
         "image": "DITRAZOLE.jpg"
     },
     {
@@ -102,9 +102,9 @@
         "image": "Asprin1.jpg"
     },
     {
-        "name": "Panadij 500mg tab بوكس 50 شريط",
+        "name": "Panadij 500mg tab بوكس 25 شريط",
         "type": "tab",
-        "price": 11650,
+        "price": 6250,
         "image": "Panadij.jpg"
     },
     {
@@ -116,7 +116,7 @@
     {
         "name": "Algesec ",
         "type": "tab",
-        "price": 578,
+        "price": 580,
         "image": "Algesec.jpg"
     },
     {
@@ -140,7 +140,7 @@
     {
         "name": "Betnozum/ (بدون) ",
         "type": "ointment",
-        "price": 395,
+        "price": 366,
         "image": "Betnozum2.jpg"
     },
     {
@@ -152,7 +152,7 @@
     {
         "name": "Dormadiem/ (بدون)",
         "type": "ointment",
-        "price": 365,
+        "price": 375,
         "image": "Dormadiem2.jpg"
     },
     {
@@ -164,7 +164,7 @@
     {
         "name": "Dormadiem/ (بدون)",
         "type": "cream",
-        "price": 355,
+        "price": 371,
         "image": "Dormadiem1.jpg"
     },
     {
@@ -188,7 +188,7 @@
     {
         "name": "Dr-Betnozam/  (باكيت)",
         "type": "cream",
-        "price": 420,
+        "price": 391,
         "image": "Betnozam4.jpg"
     },
     {
@@ -212,7 +212,7 @@
     {
         "name": "Fugideen-D/ (بدون)",
         "type": "cream",
-        "price": 320,
+        "price": 325,
         "image": "Fugideen1.jpg"
     },
     {
@@ -230,19 +230,19 @@
     {
         "name": "Nastocord /  (بدون)",
         "type": "cream",
-        "price": 750,
+        "price": 775,
         "image": "Nastocord1.jpg"
     },
     {
         "name": "Nastocord / (باكيت)",
         "type": "cream",
-        "price": 785,
+        "price": 825,
         "image": "Nastocord2.jpg"
     },
     {
         "name": "Hydrocortizon-D/ (بدون)",
         "type": "cream",
-        "price": 559,
+        "price": 570,
         "image": "Hydrocortizon1.jpg"
     },
     {
@@ -260,31 +260,31 @@
     {
         "name": "Nastocord /(بدون)",
         "type": "ointment",
-        "price": 750,
+        "price": 775,
         "image": "Nastocord222.jpg"
     },
     {
         "name": "Quderm/  (باكيت)",
         "type": "cream",
-        "price": 770,
+        "price": 820,
         "image": "Quderm.jpg"
     },
     {
         "name": "Tetracyclen-D/ (بدون)",
         "type": "ointment",
-        "price": 525,
+        "price": 531,
         "image": "Tetracyclen1.jpg"
     },
     {
         "name": "Tetracyclen-D/ (باكيت)",
         "type": "ointment",
-        "price": 540,
+        "price": 550,
         "image": "Tetracyclen2.jpg"
     },
     {
         "name": "Zinc Oxed-D/ (بدون)",
         "type": "ointment",
-        "price": 530,
+        "price": 550,
         "image": "Zinc_Oxed1.jpg"
     },
     {
@@ -320,7 +320,7 @@
     {
         "name": "Alermiden/ (باكيت)",
         "type": "syrup",
-        "price": 570,
+        "price": 530,
         "image": "Alermiden1.jpg"
     },
     {
@@ -356,7 +356,7 @@
     {
         "name": "Dij-Exdile/(باكيت)",
         "type": "syrup",
-        "price": 730,
+        "price": 680,
         "image": "Exdile1.jpg"
     },
     {
@@ -386,7 +386,7 @@
     {
         "name": "Dr-Panadolz/250mg (باكيت)",
         "type": "syrup",
-        "price": 785,
+        "price": 790,
         "image": "Panadolz1.jpg"
     },
     {
@@ -410,7 +410,7 @@
     {
         "name": "Siedlar-D/(باكيت)",
         "type": "syrup",
-        "price": 800,
+        "price": 740,
         "image": "Siedlar1.jpg"
     },
     {
@@ -446,7 +446,7 @@
     {
         "name": "Pyrolz/ 120mg (باكيت)",
         "type": "syrup",
-        "price": 500,
+        "price": 675,
         "image": "Pyrolz.jpg"
     },
     {
@@ -470,7 +470,7 @@
     {
         "name": "Ibuprofen / (باكيت)",
         "type": "susp",
-        "price": 710,
+        "price": 740,
         "image": "Ibuprofen.jpg"
     },
     {
@@ -506,7 +506,7 @@
     {
         "name": "Dr-Panadolz infant/",
         "type": "drop",
-        "price": 830,
+        "price": 766,
         "image": "Panadolz_infant.jpg"
     }
 ]
