@@ -13,243 +13,34 @@
     .subtitle{font-size:13px;opacity:.95}
     .container{max-width:980px;margin:20px auto;padding:0 16px}
     
-    /* حقل العروض المحسن */
-    .offer-banner{
-      background: linear-gradient(135deg, #ff6b35, #f7931e, #ffd93d);
-      color: white;
-      padding: 20px;
-      border-radius: 16px;
-      margin-bottom: 30px;
-      box-shadow: 0 8px 32px rgba(255, 107, 53, 0.3);
-      border: 3px solid #fff;
-      position: relative;
-      overflow: hidden;
-    }
-    .offer-banner::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-      transform: rotate(45deg);
-      animation: shine 3s infinite;
-    }
-    @keyframes shine {
-      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-    }
-    .offer-title{
-      font-size: 24px;
-      font-weight: 900;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-      position: relative;
-      z-index: 2;
-    }
-    .offer-content{
-      font-size: 18px;
-      line-height: 1.8;
-      font-weight: 600;
-      text-align: center;
-      position: relative;
-      z-index: 2;
-      background: rgba(255,255,255,0.1);
-      padding: 15px;
-      border-radius: 12px;
-      backdrop-filter: blur(10px);
-    }
-    .offer-highlight{
-      color: #2d3748;
-      background: linear-gradient(135deg, #ffd93d, #fff);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-weight: 800;
-      margin: 0 5px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    .offer-icon{
-      font-size: 32px;
-      animation: bounce 2s infinite;
-    }
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-    .offer-badge{
-      position: absolute;
-      top: -10px;
-      left: 20px;
-      background: #dc2626;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 700;
-      z-index: 3;
-      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
-    }
-    
-    /* الزر العائم المحسن مع العداد */
-    .floating-order-btn {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      background: linear-gradient(135deg, #25D366, #128C7E);
-      color: white;
-      padding: 16px 24px;
-      border-radius: 50px;
-      box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
-      border: none;
-      font-weight: 700;
-      font-size: 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      z-index: 999;
-      transition: all 0.3s ease;
-      animation: pulse 2s infinite;
-    }
-    .floating-order-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 30px rgba(37, 211, 102, 0.6);
-    }
-    .floating-order-btn:active {
-      transform: translateY(-1px);
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-    .whatsapp-icon {
-      font-size: 24px;
-    }
-    .order-count-badge {
-      background: #ff4444;
-      color: white;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 800;
-      animation: bounce 1s infinite;
-    }
-    .order-total {
-      font-size: 14px;
-      opacity: 0.9;
-      margin-right: 5px;
-    }
-    
-    /* نموذج اكمال الطلب على عرض الشاشة */
-    .order-form-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.9);
-      display: none;
-      z-index: 1001;
-      overflow-y: auto;
-    }
-    
-    .order-form-container {
-      background: white;
-      min-height: 100vh;
-      padding: 40px 20px;
-      position: relative;
-    }
-    
-    .form-header {
-      background: var(--blue);
-      color: white;
-      padding: 25px 20px;
-      text-align: center;
-      margin: -40px -20px 30px -20px;
-    }
-    
-    .form-close-btn {
-      position: absolute;
-      top: 25px;
-      left: 25px;
-      background: rgba(255,255,255,0.2);
-      border: none;
-      font-size: 28px;
-      cursor: pointer;
-      color: white;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1002;
-    }
-    
-    .form-close-btn:hover {
-      background: rgba(255,255,255,0.3);
-    }
-    
-    .form-title {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-    
-    .form-subtitle {
-      font-size: 16px;
-      opacity: 0.9;
-    }
-    
-    .form-summary {
-      background: var(--light);
-      padding: 25px;
-      border-radius: 16px;
-      margin-bottom: 30px;
-      text-align: center;
-      border: 2px solid var(--blue);
-    }
-    
-    .total-amount {
-      font-size: 32px;
-      font-weight: 800;
-      color: var(--blue);
-      margin: 10px 0;
-    }
-    
-    .items-count {
-      font-size: 16px;
-      color: var(--muted);
-    }
+    /* حقل العروض البسيط */
+    .offer-banner{background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:white;padding:15px 20px;border-radius:12px;margin-bottom:25px;text-align:center;box-shadow:0 4px 15px rgba(255,107,107,0.3);border:2px solid #ff9f43;}
+    .offer-title{font-size:20px;font-weight:800;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:10px;}
+    .offer-content{font-size:16px;line-height:1.5;font-weight:500;}
+    .offer-icon{font-size:24px;}
     
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
     .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(11,99,179,0.08);display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:transform 0.2s ease;}
     .card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(11,99,179,0.12)}
-    .card img{width:130px;height:130px;object-fit:contain;border-radius:8px;background:#fff;padding:6px;border:1px solid #f0f0f0;cursor:zoom-in;transition:transform 0.3s ease;}
-    .card img:hover{transform:scale(1.05);}
+    .card.disabled{opacity:0.5;cursor:not-allowed;background:#f5f5f5;}
+    .card.disabled:hover{transform:none;box-shadow:0 6px 18px rgba(11,99,179,0.08)}
+    .card img{width:130px;height:130px;object-fit:contain;border-radius:8px;background:#fff;padding:6px;border:1px solid #f0f0f0;}
     .name{font-weight:700;margin-top:10px;font-size:15px;}
     .type{font-size:13px;color:var(--muted);margin-top:6px;min-height:36px;}
     .price{margin-top:8px;font-weight:700;color:var(--blue);font-size:14px;}
     .qty{margin-top:12px;display:flex;align-items:center;gap:8px}
-    .btn{background:var(--blue);color:#fff;border:none;padding:16px 24px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;font-size:18px;margin-top:20px;}
+    .btn{background:var(--blue);color:#fff;border:none;padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer;width:100%;}
+    .btn:disabled,.qty button:disabled{background:#ccc;cursor:not-allowed;}
     .qty button{width:36px;height:36px;border-radius:8px;border:1px solid #e6eefb;background:white;cursor:pointer;font-weight:bold;}
+    .qty button:disabled{background:#f0f0f0;color:#999;}
     .qty input{width:56px;text-align:center;border:1px solid #e6eefb;border-radius:8px;padding:8px;font-size:14px;}
-    
-    form{display:flex;flex-direction:column;gap:20px;width:100%;max-width:600px;margin:0 auto;}
-    .form-group{display:flex;flex-direction:column;gap:8px;}
-    .form-label{font-weight:600;color:#333;font-size:16px;}
-    input,textarea,select{border:2px solid #e6eefb;border-radius:10px;padding:15px;width:100%;font-size:16px;transition:border-color 0.3s ease;}
-    input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue);}
-    textarea{resize:none;height:100px;}
+    .qty input:disabled{background:#f5f5f5;color:#999;border-color:#d0d0d0;}
+    footer{position:fixed;left:0;right:0;bottom:0;background:#fff;padding:12px;border-top:1px solid #eef3fb;display:flex;flex-direction:column;align-items:center;gap:10px}
+    .summary{display:flex;flex-direction:column;align-items:center;gap:4px}
+    .total{font-weight:800;font-size:18px;color:var(--blue)}
+    form{display:flex;flex-direction:column;gap:8px;width:100%;max-width:400px;padding:8px}
+    input,textarea,select{border:1px solid #e6eefb;border-radius:8px;padding:8px;width:100%;font-size:14px}
+    textarea{resize:none;height:60px}
     .loading{text-align:center;padding:20px;color:var(--muted)}
     
     /* نمط البطاقة الموسعة */
@@ -257,7 +48,7 @@
     .expanded-card{background:white;border-radius:20px;padding:30px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;position:relative;text-align:center;}
     .close-btn{position:absolute;top:15px;left:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#666;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
     .close-btn:hover{background:#f5f5f5;}
-    .expanded-image{width:200px;height:200px;object-fit:contain;margin-bottom:20px;cursor:pointer;}
+    .expanded-image{width:200px;height:200px;object-fit:contain;margin-bottom:20px;}
     .expanded-name{font-size:24px;font-weight:700;color:#333;margin-bottom:10px;}
     .expanded-type{font-size:16px;color:var(--muted);margin-bottom:15px;}
     .expanded-price{font-size:20px;font-weight:700;color:var(--blue);margin-bottom:20px;}
@@ -267,159 +58,13 @@
     .add-to-cart{background:var(--blue);color:white;border:none;padding:15px 30px;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px;width:100%;}
     .add-to-cart:hover{background:#0a5aa3;}
     
-    /* نافذة تكبير الصورة */
-    .image-zoom-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.95);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1003;
-      padding: 20px;
-    }
-    
-    .image-zoom-container {
-      position: relative;
-      max-width: 90%;
-      max-height: 90%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .zoomed-image {
-      max-width: 100%;
-      max-height: 90vh;
-      object-fit: contain;
-      border-radius: 10px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    }
-    
-    .zoom-close-btn {
-      position: absolute;
-      top: -50px;
-      left: 0;
-      background: rgba(255,255,255,0.2);
-      border: none;
-      font-size: 28px;
-      cursor: pointer;
-      color: white;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.3s ease;
-    }
-    
-    .zoom-close-btn:hover {
-      background: rgba(255,255,255,0.3);
-    }
-    
-    .image-info {
-      position: absolute;
-      bottom: -60px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      color: white;
-    }
-    
-    .image-name {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 5px;
-    }
-    
-    .image-type {
-      font-size: 16px;
-      opacity: 0.8;
-    }
-    
-    @media(max-width:768px){
-      .order-form-container {
-        padding: 20px 15px;
-      }
-      .form-header {
-        padding: 20px 15px;
-        margin: -20px -15px 20px -15px;
-      }
-      .form-close-btn {
-        top: 20px;
-        left: 20px;
-        width: 45px;
-        height: 45px;
-      }
-      .form-title {
-        font-size: 24px;
-      }
-      .total-amount {
-        font-size: 28px;
-      }
-      .zoomed-image {
-        max-width: 95%;
-        max-height: 85vh;
-      }
-      .zoom-close-btn {
-        top: -45px;
-        width: 45px;
-        height: 45px;
-      }
-      .image-info {
-        bottom: -50px;
-      }
-      .image-name {
-        font-size: 18px;
-      }
-    }
-    
     @media(max-width:520px){
       .card img{width:110px;height:110px}
       .expanded-card{padding:20px;}
       .expanded-image{width:150px;height:150px;}
       .expanded-name{font-size:20px;}
-      .offer-title{font-size:20px;}
-      .offer-content{font-size:16px; padding: 12px;}
-      .offer-badge{left: 10px; padding: 6px 12px; font-size: 12px;}
-      .floating-order-btn {
-        bottom: 15px;
-        left: 15px;
-        padding: 14px 20px;
-        font-size: 14px;
-        gap: 8px;
-      }
-      .order-count-badge {
-        width: 20px;
-        height: 20px;
-        font-size: 12px;
-      }
-      .order-total {
-        font-size: 12px;
-      }
-      .zoomed-image {
-        max-width: 98%;
-        max-height: 80vh;
-      }
-      .zoom-close-btn {
-        top: -40px;
-        width: 40px;
-        height: 40px;
-        font-size: 24px;
-      }
-      .image-info {
-        bottom: -45px;
-      }
-      .image-name {
-        font-size: 16px;
-      }
-      .image-type {
-        font-size: 14px;
-      }
+      .offer-title{font-size:18px;}
+      .offer-content{font-size:14px;}
     }
   </style>
 </head>
@@ -432,13 +77,11 @@
   </header>
 
   <main class="container">
-    <!-- حقل العروض المحسن -->
+    <!-- حقل العروض البسيط -->
     <div class="offer-banner" id="offerBanner">
-      <div class="offer-badge">عرض محدود</div>
       <div class="offer-title">
-        <span class="offer-icon">🏆</span>
-        الكوتا الذهبية - استثمارك ينمو 10 أضعاف
-        <span class="offer-icon">💰</span>
+        <span class="offer-icon">🎁</span>
+        العروض الحالية
       </div>
       <div class="offer-content" id="offerContent">
         <!-- سيتم تعبئة النص هنا -->
@@ -449,76 +92,11 @@
     <section class="grid" id="products"></section>
   </main>
 
-  <!-- الزر العائم مع العداد -->
-  <button class="floating-order-btn" id="floatingOrderBtn">
-    <span class="whatsapp-icon">🛒</span>
-    <span class="order-total" id="floatingTotal">0 د.ع</span>
-    <span class="order-count-badge" id="orderCountBadge">0</span>
-    اكمال الطلب
-  </button>
-
-  <!-- نافذة تكبير الصورة -->
-  <div class="image-zoom-overlay" id="imageZoomOverlay">
-    <div class="image-zoom-container">
-      <button class="zoom-close-btn" id="zoomCloseBtn">×</button>
-      <img class="zoomed-image" id="zoomedImage" src="" alt="">
-      <div class="image-info">
-        <div class="image-name" id="zoomedImageName"></div>
-        <div class="image-type" id="zoomedImageType"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- نموذج اكمال الطلب على عرض الشاشة -->
-  <div class="order-form-overlay" id="orderFormOverlay">
-    <div class="order-form-container">
-      <button class="form-close-btn" id="formCloseBtn">×</button>
-      
-      <div class="form-header">
-        <h2 class="form-title">اكمال الطلب</h2>
-        <div class="form-subtitle">املأ المعلومات التالية لإرسال طلبك</div>
-      </div>
-
-      <div class="form-summary">
-        <div>إجمالي الطلب</div>
-        <div class="total-amount" id="formTotal">0 د.ع</div>
-        <div class="items-count" id="itemsCount">0 منتج</div>
-      </div>
-
-      <form id="customer-info">
-        <div class="form-group">
-          <label class="form-label" for="custName">اسم الصيدلية *</label>
-          <input type="text" id="custName" placeholder="أدخل اسم الصيدلية" required>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label" for="custPhone">رقم الهاتف *</label>
-          <input type="tel" id="custPhone" placeholder="مثال: 07812345678" required>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label" for="custAddress">العنوان</label>
-          <input type="text" id="custAddress" placeholder="أدخل العنوان التفصيلي">
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label" for="custNotes">ملاحظات التجهيز</label>
-          <textarea id="custNotes" placeholder="اسم المذخر أو أي ملاحظات أخرى"></textarea>
-        </div>
-        
-        <button type="button" class="btn" id="sendOrder">
-          <span class="whatsapp-icon">📱</span>
-          إرسال الطلب عبر واتساب
-        </button>
-      </form>
-    </div>
-  </div>
-
   <!-- البطاقة الموسعة -->
   <div class="overlay" id="overlay">
     <div class="expanded-card" id="expandedCard">
       <button class="close-btn" id="closeBtn">×</button>
-      <img class="expanded-image" id="expandedImage" src="" alt="" onclick="zoomImage(this.src, this.alt)">
+      <img class="expanded-image" id="expandedImage" src="" alt="">
       <div class="expanded-name" id="expandedName"></div>
       <div class="expanded-type" id="expandedType"></div>
       <div class="expanded-price" id="expandedPrice"></div>
@@ -531,50 +109,32 @@
     </div>
   </div>
 
+  <footer>
+    <div class="summary">
+      <div>إجمالي الطلب</div>
+      <div class="total" id="total">0 د.ع</div>
+    </div>
+
+    <form id="customer-info">
+      <input type="text" id="custName" placeholder="اسم الصيدلية " required>
+      <input type="tel" id="custPhone" placeholder="رقم الهاتف" required>
+      <input type="text" id="custAddress" placeholder="العنوان" />
+      <textarea id="custNotes" placeholder="ملاحظات التجهيز (اسم المذخر)"></textarea>
+      <button type="button" class="btn" id="send">إرسال الطلب عبر واتساب</button>
+    </form>
+  </footer>
+
   <script>
     const WHATSAPP_NUMBER = '9647812374712';
     let currentExpandedCard = null;
     
-    // نص العرض الحالي المحسن
-    const currentOfferText = `🎯 <span class="offer-highlight">الكوتا الذهبية</span> - استثمارك ينمو 10 أضعاف! 
-    
-📈 عند وصول طلبك إلى <span class="offer-highlight">1,000,000 دينار</span>:
-→ تحصل على <span class="offer-highlight">10% أدوية إضافية مجانية</span> 
-→ هدية بقيمة <span class="offer-highlight">100,000 دينار</span> تضاف تلقائياً لمخزونك
-→ <span class="offer-highlight">زيادة فعلية في أرباحك</span> وليس مجرد خصم!
-
-💎 <span class="offer-highlight">استغل الفرصة الآن</span> - العرض لفترة محدودة`;
-
-    // دالة تكبير الصورة
-    function zoomImage(imageSrc, imageAlt) {
-      const zoomOverlay = document.getElementById('imageZoomOverlay');
-      const zoomedImage = document.getElementById('zoomedImage');
-      const zoomedImageName = document.getElementById('zoomedImageName');
-      const zoomedImageType = document.getElementById('zoomedImageType');
-      
-      zoomedImage.src = imageSrc;
-      zoomedImage.alt = imageAlt;
-      
-      // استخراج اسم ونوع المنتج من البطاقة الموسعة
-      const productName = document.getElementById('expandedName').textContent;
-      const productType = document.getElementById('expandedType').textContent;
-      
-      zoomedImageName.textContent = productName;
-      zoomedImageType.textContent = productType;
-      
-      zoomOverlay.style.display = 'flex';
-    }
-
-    // دالة إغلاق تكبير الصورة
-    function closeImageZoom() {
-      const zoomOverlay = document.getElementById('imageZoomOverlay');
-      zoomOverlay.style.display = 'none';
-    }
+    // نص العرض الحالي - يمكنك تعديل هذا النص بسهولة
+    const currentOfferText = "عرض الكوتا الذهبية: استثمارك ينمو 10 أضعاف استغل الآن... وفّر أكثر\n\nعندما يصل إجمالي قيمة طلبية الشراء الواحدة من الأدوية إلى مليون دينار عراقي، ستحصل فورًا على أدوية إضافية مجانية بقيمة لا تقل عن 10% من قيمة مشترياتك\n\nبمعنى آخر على كل مليون دينار تنفقه، تحصل على ما قيمته 100,000 دينار من الأدوية مجانًا. هذا ليس مجرد خصم، بل هو زيادة فعلية في مخزونك وأرباحك";
 
     // دالة لعرض نص العرض
     function loadOffer() {
       const offerContent = document.getElementById('offerContent');
-      offerContent.innerHTML = currentOfferText;
+      offerContent.textContent = currentOfferText;
       
       // إخفاء البانر إذا لم يكن هناك عرض
       if (!currentOfferText || currentOfferText.trim() === '') {
@@ -620,20 +180,24 @@
         card.dataset.type = item.type;
         card.dataset.price = item.price;
         card.dataset.image = imageUrl;
+        card.dataset.disabled = item.disabled ? 'true' : 'false';
+        
+        if (item.disabled) {
+          card.classList.add('disabled');
+        }
         
         const placeholderImage = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9Ijc1IiB5PSI3NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5Ij7Yp9mE2LXZiNix2Kkg2LrZitixINmF2KrZiNmB2LHYqTwvdGV4dD48L3N2Zz4=';
         
         card.innerHTML = `
           <img src="${imageUrl}" alt="${item.name}" 
-               onerror="this.src='${placeholderImage}'"
-               onclick="zoomCardImage('${imageUrl}', '${item.name}', '${item.type}')" />
+               onerror="this.src='${placeholderImage}'" />
           <div class="name">${item.name}</div>
           <div class="type">${item.type}</div>
           <div class="price">سعر القطعة: <span>${formatCurrency(item.price)}</span> د.ع</div>
           <div class="qty">
-            <button class="dec">−</button>
-            <input type="number" min="0" value="0" class="count" />
-            <button class="inc">+</button>
+            <button class="dec" ${item.disabled ? 'disabled' : ''}>−</button>
+            <input type="number" min="0" value="0" class="count" ${item.disabled ? 'disabled' : ''} />
+            <button class="inc" ${item.disabled ? 'disabled' : ''}>+</button>
           </div>`;
         container.appendChild(card);
       }
@@ -643,51 +207,15 @@
       recalc();
     }
 
-    // دالة تكبير صورة البطاقة
-    function zoomCardImage(imageSrc, productName, productType) {
-      const zoomOverlay = document.getElementById('imageZoomOverlay');
-      const zoomedImage = document.getElementById('zoomedImage');
-      const zoomedImageName = document.getElementById('zoomedImageName');
-      const zoomedImageType = document.getElementById('zoomedImageType');
-      
-      zoomedImage.src = imageSrc;
-      zoomedImage.alt = productName;
-      zoomedImageName.textContent = productName;
-      zoomedImageType.textContent = productType;
-      
-      zoomOverlay.style.display = 'flex';
-    }
-
     function formatCurrency(n){return n.toLocaleString('en-US');}
-
-    // دالة تحديث الزر العائم
-    function updateFloatingButton() {
-      const total = recalc();
-      const floatingTotal = document.getElementById('floatingTotal');
-      const orderCountBadge = document.getElementById('orderCountBadge');
-      
-      // حساب عدد المنتجات المضافة
-      let itemsCount = 0;
-      document.querySelectorAll('.card').forEach(card => {
-        const qty = Number(card.querySelector('.count').value || 0);
-        if (qty > 0) {
-          itemsCount++;
-        }
-      });
-      
-      floatingTotal.textContent = formatCurrency(total) + ' د.ع';
-      orderCountBadge.textContent = itemsCount;
-      
-      // إظهار/إخفاء البادجة حسب وجود منتجات
-      if (itemsCount > 0) {
-        orderCountBadge.style.display = 'flex';
-      } else {
-        orderCountBadge.style.display = 'none';
-      }
-    }
 
     // دالة لعرض البطاقة الموسعة
     function expandCard(card) {
+      // منع فتح البطاقات المعطلة
+      if (card.dataset.disabled === 'true') {
+        return;
+      }
+      
       const overlay = document.getElementById('overlay');
       const expandedImage = document.getElementById('expandedImage');
       const expandedName = document.getElementById('expandedName');
@@ -702,7 +230,6 @@
       const currentQty = card.querySelector('.count').value;
       
       expandedImage.src = image;
-      expandedImage.alt = name;
       expandedName.textContent = name;
       expandedType.textContent = type;
       expandedPrice.textContent = `سعر القطعة: ${formatCurrency(price)} د.ع`;
@@ -738,65 +265,106 @@
         const expandedCount = document.getElementById('expandedCount');
         const originalInput = currentExpandedCard.querySelector('.count');
         originalInput.value = expandedCount.value;
-        updateFloatingButton();
-        updateFormTotal();
+        recalc();
         closeExpandedCard();
       }
     }
 
-    // دالة فتح نموذج الطلب
-    function openOrderForm() {
-      const orderForm = document.getElementById('orderFormOverlay');
-      orderForm.style.display = 'block';
-      updateFormTotal();
-    }
-
-    // دالة إغلاق نموذج الطلب
-    function closeOrderForm() {
-      const orderForm = document.getElementById('orderFormOverlay');
-      orderForm.style.display = 'none';
-    }
-
-    // دالة تحديث المجموع في النموذج
-    function updateFormTotal() {
-      const formTotal = document.getElementById('formTotal');
-      const itemsCount = document.getElementById('itemsCount');
-      const total = recalc();
+    function attachEvents(){
+      const cards = document.querySelectorAll('.card');
+      const closeBtn = document.getElementById('closeBtn');
+      const overlay = document.getElementById('overlay');
+      const addToCartBtn = document.getElementById('addToCart');
       
-      // حساب عدد المنتجات المضافة
-      let items = 0;
-      let productsCount = 0;
-      document.querySelectorAll('.card').forEach(card => {
-        const qty = Number(card.querySelector('.count').value || 0);
-        if (qty > 0) {
-          items++;
-          productsCount += qty;
+      cards.forEach(card => {
+        card.addEventListener('click', (e) => {
+          // منع الضغط على البطاقات المعطلة
+          if (card.dataset.disabled === 'true') {
+            e.preventDefault();
+            return;
+          }
+          
+          if (!e.target.classList.contains('dec') && 
+              !e.target.classList.contains('inc') && 
+              !e.target.classList.contains('count')) {
+            expandCard(card);
+          }
+        });
+        
+        const inc = card.querySelector('.inc');
+        const dec = card.querySelector('.dec');
+        const input = card.querySelector('.count');
+        
+        // تخطي معالجات الأحداث للبطاقات المعطلة
+        if (card.dataset.disabled === 'true') {
+          return;
+        }
+        
+        inc.addEventListener('click', (e) => {
+          e.stopPropagation();
+          input.value = Math.max(0, Number(input.value || 0) + 1);
+          recalc();
+        });
+        
+        dec.addEventListener('click', (e) => {
+          e.stopPropagation();
+          input.value = Math.max(0, Number(input.value || 0) - 1);
+          recalc();
+        });
+        
+        input.addEventListener('change', () => {
+          if (Number(input.value) < 0) input.value = 0;
+          recalc();
+        });
+        
+        input.addEventListener('input', () => {
+          if (Number(input.value) < 0) input.value = 0;
+          recalc();
+        });
+      });
+      
+      closeBtn.addEventListener('click', closeExpandedCard);
+      addToCartBtn.addEventListener('click', addToCartFromExpanded);
+      
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          closeExpandedCard();
         }
       });
       
-      formTotal.textContent = formatCurrency(total) + ' د.ع';
-      itemsCount.textContent = `${items} منتج - ${productsCount} قطعة`;
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.style.display === 'flex') {
+          closeExpandedCard();
+        }
+      });
     }
 
-    // دالة إرسال الطلب
-    function sendOrder() {
+    function recalc(){
+      let total=0;
+      document.querySelectorAll('.card').forEach(card=>{
+        const price=Number(card.dataset.price);
+        const qty=Number(card.querySelector('.count').value||0);
+        total+=price*qty;
+      });
+      document.getElementById('total').textContent=total===0?'0 د.ع':formatCurrency(total)+' د.ع';
+      return total;
+    }
+
+    document.getElementById('send').addEventListener('click',()=>{
       const name=document.getElementById('custName').value.trim();
       const phone=document.getElementById('custPhone').value.trim();
       const address=document.getElementById('custAddress').value.trim();
       const notes=document.getElementById('custNotes').value.trim();
 
-      // تنظيف رقم الهاتف
-      const cleanPhone = phone.replace(/\s/g, '').replace(/^(\+?964|0)/, '');
-      
       // التحقق من صحة رقم الهاتف
-      if(!/^7[0-9]{9}$/.test(cleanPhone)) {
-        alert('الرجاء إدخال رقم هاتف عراقي صحيح (مثال: 07812345678)');
+      if(!/^(\+?964|0)?7[0-9]{9}$/.test(phone.replace(/\s/g, ''))) {
+        alert('الرجاء إدخال رقم هاتف عراقي صحيح');
         return;
       }
 
       // التحقق من اسم الصيدلية
       if(name.length < 3) {
-        alert('الرجاء إدخال اسم صيدلية صحيح (3 أحرف على الأقل)');
+        alert('الرجاء إدخال اسم صيدلية صحيح');
         return;
       }
 
@@ -816,172 +384,49 @@
         alert('لم يتم إضافة أي منتجات للطلب. الرجاء اختيار المنتجات وتحديد الكميات المطلوبة قبل إرسال الطلب.');
         return;
       }
-
-      // رسالة الطلب المحسنة
-      let msg = `🟦 *طلب جديد - شركة دجلة للصناعات الدوائية* 🟦
-      
-📋 *تفاصيل الطلب:*
-${items.map((it, index) => 
-`${index + 1}. ${it.n}
-   📦 النوع: ${it.t}
-   🔢 الكمية: ${it.q}
-   💰 السعر: ${formatCurrency(it.p)} د.ع
-   💵 الإجمالي: ${formatCurrency(it.p * it.q)} د.ع
-   ───────────────────`
-).join('%0A')}
-
-💰 *المجموع الكلي: ${formatCurrency(total)} د.ع*
-
-👤 *معلومات العميل:*
-🏢 الصيدلية: ${name}
-📞 الهاتف: ${phone}
-📍 العنوان: ${address || '—'}
-📝 الملاحظات: ${notes || '—'}
-
-شكراً لتعاملكم مع شركة دجلة للصناعات الدوائية 🏥`;
-
-      // إرسال الطلب الرئيسي
-      const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-      const orderWindow = window.open(waLink, '_blank');
-      
-      // إرسال رسالة الشكر بعد تأكيد الطلب
-      if (orderWindow) {
-        setTimeout(() => {
-          const thankMsg = `عزيزنا الصيدلي المحترم ${name}،
-
-شكراً جزيلاً لثقتكم بشركة دجلة للصناعات الدوائية.
-
-✅ *تم استلام طلبكم بنجاح*
-📦 جاري تجهيز الطلب
-🚚 سيتم التواصل معكم لتأكيد موعد التوصيل
-
-رقم طلبكم: #${Date.now().toString().slice(-6)}
-المجموع: ${formatCurrency(total)} د.ع
-
-للاستفسار، لا تتردد في التواصل معنا.
-
-مع خالص التقدير،
-فريق خدمة العملاء - شركة دجلة للصناعات الدوائية
-📞 ${WHATSAPP_NUMBER}`;
-
-          const thanksLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(thankMsg)}`;
-          window.open(thanksLink, '_blank');
-        }, 2000);
-        
-        // إغلاق النموذج بعد الإرسال
-        closeOrderForm();
-        
-        // تفريغ الحقول
-        document.getElementById('custName').value = '';
-        document.getElementById('custPhone').value = '';
-        document.getElementById('custAddress').value = '';
-        document.getElementById('custNotes').value = '';
+      if(!name||!phone){
+        alert('الرجاء إدخال الاسم ورقم الهاتف.');
+        return;
       }
-    }
 
-    function attachEvents(){
-      const cards = document.querySelectorAll('.card');
-      const closeBtn = document.getElementById('closeBtn');
-      const overlay = document.getElementById('overlay');
-      const addToCartBtn = document.getElementById('addToCart');
-      const floatingOrderBtn = document.getElementById('floatingOrderBtn');
-      const formCloseBtn = document.getElementById('formCloseBtn');
-      const sendOrderBtn = document.getElementById('sendOrder');
-      const zoomCloseBtn = document.getElementById('zoomCloseBtn');
-      
-      // حدث الزر العائم
-      floatingOrderBtn.addEventListener('click', openOrderForm);
-      
-      // حدث إغلاق النموذج
-      formCloseBtn.addEventListener('click', closeOrderForm);
-      
-      // حدث زر الإرسال في النموذج
-      sendOrderBtn.addEventListener('click', sendOrder);
-      
-      // حدث إغلاق تكبير الصورة
-      zoomCloseBtn.addEventListener('click', closeImageZoom);
-      
-      // إغلاق تكبير الصورة عند النقر خارجها
-      document.getElementById('imageZoomOverlay').addEventListener('click', (e) => {
-        if (e.target === document.getElementById('imageZoomOverlay')) {
-          closeImageZoom();
-        }
+      let msg='طلب من شركة دجلة للصناعات الدوائية%0A';
+      msg+='------------------------------%0A';
+      msg+='ت  |  المادة  |  النوع  |  الكمية  |  السعر  |  الإجمالي%0A';
+      msg+='------------------------------%0A';
+      items.forEach((it, index)=>{
+        msg+=`${index + 1}  |  ${it.n}  |  ${it.t}  |  ${it.q}  |  ${formatCurrency(it.p)}  |  ${formatCurrency(it.p * it.q)} د.ع%0A`;
       });
-      
-      cards.forEach(card => {
-        card.addEventListener('click', (e) => {
-          if (!e.target.classList.contains('dec') && 
-              !e.target.classList.contains('inc') && 
-              !e.target.classList.contains('count') &&
-              e.target.tagName !== 'IMG') {
-            expandCard(card);
-          }
-        });
-        
-        const inc = card.querySelector('.inc');
-        const dec = card.querySelector('.dec');
-        const input = card.querySelector('.count');
-        
-        inc.addEventListener('click', (e) => {
-          e.stopPropagation();
-          input.value = Math.max(0, Number(input.value || 0) + 1);
-          updateFloatingButton();
-          updateFormTotal();
-        });
-        
-        dec.addEventListener('click', (e) => {
-          e.stopPropagation();
-          input.value = Math.max(0, Number(input.value || 0) - 1);
-          updateFloatingButton();
-          updateFormTotal();
-        });
-        
-        input.addEventListener('change', () => {
-          if (Number(input.value) < 0) input.value = 0;
-          updateFloatingButton();
-          updateFormTotal();
-        });
-        
-        input.addEventListener('input', () => {
-          if (Number(input.value) < 0) input.value = 0;
-          updateFloatingButton();
-          updateFormTotal();
-        });
-      });
-      
-      closeBtn.addEventListener('click', closeExpandedCard);
-      addToCartBtn.addEventListener('click', addToCartFromExpanded);
-      
-      overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-          closeExpandedCard();
-        }
-      });
-      
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          if (overlay.style.display === 'flex') {
-            closeExpandedCard();
-          }
-          if (document.getElementById('orderFormOverlay').style.display === 'block') {
-            closeOrderForm();
-          }
-          if (document.getElementById('imageZoomOverlay').style.display === 'flex') {
-            closeImageZoom();
-          }
-        }
-      });
-    }
+      msg+='------------------------------%0A';
+      msg+=`الإجمالي الكلي: ${formatCurrency(total)} د.ع%0A%0A`;
+      msg+=`معلومات العميل:%0A`;
+      msg+=`الاسم: ${name}%0A`;
+      msg+=`رقم الهاتف: ${phone}%0A`;
+      msg+=`العنوان: ${address||'—'}%0A`;
+      if(notes) msg+=`ملاحظات: ${notes}%0A`;
+      msg+='%0Aشكراً لتعاملكم مع شركة دجلة للصناعات الدوائية';
 
-    function recalc(){
-      let total=0;
-      document.querySelectorAll('.card').forEach(card=>{
-        const price=Number(card.dataset.price);
-        const qty=Number(card.querySelector('.count').value||0);
-        total+=price*qty;
-      });
-      return total;
-    }
+      // إرسال الطلب
+      const waLink=`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+      window.open(waLink,'_blank');
+
+      // إرسال رسالة الشكر بعد ثواني قليلة
+      setTimeout(() => {
+        const thankMsg = 
+`عزيزنا الصيدلي المحترم ${name}،
+نود أن نعبر عن خالص شكرنا وامتناننا لثقتكم الغالية في شركة دجلة للصناعات الدوائية.
+
+نؤكد لكم أن طلبكم محل اهتمامنا وسيتم التعامل معه بأقصى درجات العناية والمهنية. سيقوم فريقنا بتجهيز طلبكم وإيصاله في أسرع وقت ممكن.
+
+نحن نفخر بخدمتكم ونتطلع دائماً لتقديم أفضل المنتجات وأجود الخدمات لكم.
+
+معاً نحو صناعة دوائية عراقية متطورة 🌟
+فريق خدمة العملاء - شركة دجلة للصناعات الدوائية
+مندوب: محافظة الديوانية`;
+
+        const thanksLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(thankMsg)}`;
+        window.open(thanksLink,'_blank');
+      }, 3000); // إرسال بعد 3 ثواني
+    });
 
     // تحميل العرض والمنتجات عند بدء التشغيل
     loadOffer();
