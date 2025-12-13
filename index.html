@@ -550,8 +550,13 @@ document.getElementById('send').addEventListener('click',async()=>{
   if (address) msg += `   📍 العنوان: ${address}\n`;
   if (notes) msg += `   📝 ملاحظات: ${notes}\n`;
   msg += '\n═══════════════════════════════════════════\n\n';
- 
-  // إرسال الطلب — نستخدم encodeURIComponent لتفادي مشاكل الترميز
+  msg += '*📋 ملاحظات الطلب:*\n';
+  msg += '   • الطلب قيد المعالجة والتجهيز\n';
+  msg += '   • سيتم التواصل معكم قريباً للتأكيد\n';
+  msg += '   • شكراً لثقتكم بشركة دجلة للصناعات الدوائية\n\n';
+  msg += '⚕️ *معاً نحو صناعة دوائية عراقية متطورة* ⚕️';
+
+  // إرسال الطلب إلى واتساب الشركة
   const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   
   // حفظ بيانات الطلب مؤقتاً
@@ -569,16 +574,23 @@ document.getElementById('send').addEventListener('click',async()=>{
   // تخزين البيانات مؤقتاً في localStorage
   localStorage.setItem('lastOrder', JSON.stringify(orderData));
   
-  // فتح نافذة الطلب الرئيسية
+  // فتح نافذة الطلب الرئيسية (إلى رقم الشركة)
   const orderWindow = window.open(waLink, '_blank');
   
   if (orderWindow) {
-    // إظهار رسالة تأكيد للعميل
-    alert(`✅ تم إرسال طلبك بنجاح!\nالرقم المرجعي: #${orderId}\n\nسيتم إرسال رسالة شكر تلقائية خلال 3 ثواني...`);
+    // تنظيف وتجهيز رقم الهاتف للواتساب
+    let customerWhatsappNumber = phone.replace(/\s/g, ''); // إزالة المسافات
     
-    // انتظار 3 ثواني ثم إرسال رسالة الشكر
+    // إضافة +964 إذا كان الرقم يبدأ بـ 0 أو 7
+    if (customerWhatsappNumber.startsWith('0')) {
+      customerWhatsappNumber = '+964' + customerWhatsappNumber.substring(1);
+    } else if (customerWhatsappNumber.startsWith('7')) {
+      customerWhatsappNumber = '+964' + customerWhatsappNumber;
+    }
+    
+    // انتظار 3 ثواني ثم إرسال رسالة الشكر إلى العميل
     setTimeout(() => {
-      sendThankYouMessage(name, phone);
+      sendThankYouToCustomer(name, customerWhatsappNumber, orderId);
     }, 3000);
     
     // إغلاق لوحة السلة
@@ -607,8 +619,8 @@ document.getElementById('send').addEventListener('click',async()=>{
   }
 });
 
-// دالة منفصلة لإرسال رسالة الشكر
-function sendThankYouMessage(name, phone) {
+// دالة منفصلة لإرسال رسالة الشكر إلى العميل
+function sendThankYouToCustomer(name, customerPhone, orderId) {
   const thankMsg = 
 `🎉 *شكراً لتواصلكم مع شركة دجلة للصناعات الدوائية* 🎉
 
@@ -616,9 +628,10 @@ function sendThankYouMessage(name, phone) {
 
 نود أن نعبر عن خالص شكرنا وامتناننا لثقتكم الغالية في منتجاتنا وخدماتنا.
 
-*📋 حالة الطلب:*
-✅ تم استلام الطلب بنجاح
-⏳ قيد المعالجة والتجهيز
+*📋 تفاصيل طلبك:*
+✅ تم استلام طلبك بنجاح
+🆔 الرقم المرجعي: #${orderId}
+⏳ الطلب قيد المعالجة والتجهيز
 🚚 سيتم التواصل معكم خلال 24 ساعة لتحديد موعد التسليم
 
 *📞 للاستفسار:*
@@ -637,56 +650,11 @@ function sendThankYouMessage(name, phone) {
 *مندوب: محافظة الديوانية*
 📞 ${WHATSAPP_NUMBER}`;
 
-  const thanksLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(thankMsg)}`;
+  const thanksLink = `https://wa.me/${customerPhone}?text=${encodeURIComponent(thankMsg)}`;
   
-  // فتح رسالة الشكر في نافذة جديدة
-  const thanksWindow = window.open(thanksLink, '_blank');
-  
-  if (!thanksWindow) {
-    // إذا فشل فتح النافذة، نعرض زر لإرسال يدوي
-    const manualSend = confirm(
-      '⚠️ لم نتمكن من إرسال رسالة الشكر تلقائياً.\n\n' +
-      'هل ترغب في نسخ رابط رسالة الشكر لإرسالها يدوياً؟'
-    );
-    
-    if (manualSend) {
-      // نسخ الرابط إلى الحافظة
-      navigator.clipboard.writeText(thankMsg).then(() => {
-        alert('✅ تم نسخ رسالة الشكر إلى الحافظة.\nيمكنك لصقها في واتساب وإرسالها يدوياً.');
-      }).catch(() => {
-        // عرض النص للنسخ يدوياً
-        prompt('انسخ النص التالي وأرسله عبر واتساب:', thankMsg);
-      });
-    }
-  }
+  // فتح رسالة الشكر في نافذة جديدة موجهة إلى العميل
+  window.open(thanksLink, '_blank');
 }
-
-// يمكنك أيضاً إضافة زر لإعادة إرسال رسالة الشكر في حالة الفشل
-function addRetryThankYouButton() {
-  const lastOrder = localStorage.getItem('lastOrder');
-  if (lastOrder) {
-    const orderData = JSON.parse(lastOrder);
-    
-    // إضافة زر في لوحة السلة
-    const cartPanelContent = document.querySelector('.cart-panel-content form');
-    if (cartPanelContent) {
-      const retryButton = document.createElement('button');
-      retryButton.type = 'button';
-      retryButton.className = 'btn';
-      retryButton.style.background = '#28a745';
-      retryButton.textContent = '🔄 إعادة إرسال رسالة الشكر';
-      retryButton.onclick = () => {
-        sendThankYouMessage(orderData.name, orderData.phone);
-      };
-      cartPanelContent.appendChild(retryButton);
-    }
-  }
-}
-
-// استدعاء الدالة عند تحميل الصفحة
-window.addEventListener('load', () => {
-  setTimeout(addRetryThankYouButton, 1000);
-});
 
     // تحميل العرض والمنتجات عند بدء التشغيل
     loadOffer();
