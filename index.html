@@ -39,15 +39,20 @@
     /* زر العربة العائم */
     .cart-button{position:fixed;right:18px;bottom:18px;background:var(--blue);color:#fff;border:none;padding:12px 16px;border-radius:999px;box-shadow:0 8px 24px rgba(11,99,179,0.25);font-weight:800;cursor:pointer;z-index:1200;display:flex;align-items:center;gap:10px}
     .cart-button small{font-weight:700;font-size:13px}
-    /* لوحة السلة المنبثقة */
-    .cart-panel{position:fixed;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);display:none;align-items:flex-end;justify-content:center;z-index:1300}
-    .cart-panel.open{display:flex}
-    .cart-panel .cart-panel-content{background:#fff;border-radius:12px 12px 0 0;padding:18px;width:100%;max-width:980px;box-shadow:0 -8px 30px rgba(0,0,0,0.15)}
+    .cart-badge{background:#ff6b6b;color:#fff;border-radius:999px;padding:3px 8px;font-weight:800;font-size:12px;display:inline-block;min-width:24px;text-align:center}
+    /* لوحة السلة المنبثقة (انزلاق سلس من الأسفل) */
+    .cart-panel{position:fixed;left:0;right:0;bottom:0;display:flex;align-items:flex-end;justify-content:center;z-index:1300;pointer-events:none;opacity:0;transition:opacity .18s ease}
+    .cart-panel .cart-panel-content{background:#fff;border-radius:12px 12px 0 0;padding:18px;width:100%;max-width:100%;box-shadow:0 -8px 30px rgba(0,0,0,0.15);transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.9,.3,1)}
+    .cart-panel.open{pointer-events:auto;opacity:1;background:rgba(0,0,0,0.45)}
+    .cart-panel.open .cart-panel-content{transform:translateY(0)}
+    .cart-panel .cart-panel-content .form-row{width:100%}
     .close-cart{position:absolute;left:18px;top:12px;background:none;border:none;font-size:26px;cursor:pointer}
     .cart-panel .summary{margin-bottom:10px}
     .summary{display:flex;flex-direction:column;align-items:center;gap:4px}
     .total{font-weight:800;font-size:18px;color:var(--blue)}
     form{display:flex;flex-direction:column;gap:8px;width:100%;max-width:400px;padding:8px}
+    /* عند فتح لوحة السلة: اجعل الحقول تملأ عرض الصفحة */
+    .cart-panel .cart-panel-content form{max-width:100%;padding:6px 12px}
     input,textarea,select{border:1px solid #e6eefb;border-radius:8px;padding:8px;width:100%;font-size:14px}
     textarea{resize:none;height:60px}
     .loading{text-align:center;padding:20px;color:var(--muted)}
@@ -63,7 +68,7 @@
     .expanded-price{font-size:20px;font-weight:700;color:var(--blue);margin-bottom:20px;}
     .expanded-qty{display:flex;align-items:center;justify-content:center;gap:15px;margin:25px 0;}
     .expanded-qty button{width:50px;height:50px;border-radius:12px;border:2px solid #e6eefb;background:white;cursor:pointer;font-size:20px;font-weight:bold;}
-    .expanded-qty input{width:80px;height:50px;text-align:center;border:2px solid #e6eefb;border-radius:12px;font-size:18px;font-weight:bold;}
+    .expanded-qty input{width:80px;height=50px;text-align:center;border:2px solid #e6eefb;border-radius:12px;font-size:18px;font-weight:bold;}
     .add-to-cart{background:var(--blue);color:white;border:none;padding:15px 30px;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px;width:100%;}
     .add-to-cart:hover{background:#0a5aa3;}
     
@@ -90,7 +95,7 @@
     <div class="offer-banner" id="offerBanner">
       <div class="offer-title">
         <span class="offer-icon">🎁</span>
-        العروض الحالية
+        <span>العروض الحالية</span>
       </div>
       <div class="offer-content" id="offerContent">
         <!-- سيتم تعبئة النص هنا -->
@@ -120,7 +125,11 @@
 
   <!-- زر العربة العائم -->
   <button id="cartButton" class="cart-button" aria-expanded="false" aria-controls="cartPanel">
-    <div>إجمالي: <span id="cartTotal">0 د.ع</span></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span>إجمالي: <strong id="cartTotal">0 د.ع</strong></span>
+      <span class="cart-badge" id="cartCount" style="display:none">0</span>
+      <span style="font-weight:700">إكمال الطلب</span>
+    </div>
   </button>
 
   <!-- لوحة السلة (تفتح عند الضغط على الزر) -->
@@ -145,19 +154,52 @@
   <script>
     const WHATSAPP_NUMBER = '9647812374712';
     let currentExpandedCard = null;
-    
-    // نص العرض الحالي - يمكنك تعديل هذا النص بسهولة
-    const currentOfferText = "عرض الكوتا الذهبية: استثمارك ينمو 10 أضعاف استغل الآن... وفّر أكثر\n\nعندما يصل إجمالي قيمة طلبية الشراء الواحدة من الأدوية إلى مليون دينار عراقي، ستحصل فورًا على أدوية إضافية مجانية بقيمة لا تقل عن 10% من قيمة مشترياتك\n\nبمعنى آخر على كل مليون دينار تنفقه، تحصل على ما قيمته 100,000 دينار من الأدوية مجانًا. هذا ليس مجرد خصم، بل هو زيادة فعلية في مخزونك وأرباحك";
+    let currentOfferIndex = 0;
+    let allOffers = [];
 
-    // دالة لعرض نص العرض
-    function loadOffer() {
+    // دالة لعرض العروض من offers.json
+    async function loadOffer() {
       const offerContent = document.getElementById('offerContent');
-      offerContent.textContent = currentOfferText;
+      const offerBanner = document.getElementById('offerBanner');
+      const offerTitle = document.querySelector('.offer-title');
       
-      // إخفاء البانر إذا لم يكن هناك عرض
-      if (!currentOfferText || currentOfferText.trim() === '') {
-        document.getElementById('offerBanner').style.display = 'none';
+      try {
+        const response = await fetch('offers.json');
+        const offerData = await response.json();
+        allOffers = offerData.offers || [];
+        
+        if (allOffers.length > 0) {
+          offerBanner.style.display = 'block';
+          displayCurrentOffer();
+          
+          // تبديل العرض كل 5 ثواني إذا كان هناك عروض متعددة
+          if (allOffers.length > 1) {
+            setInterval(() => {
+              currentOfferIndex = (currentOfferIndex + 1) % allOffers.length;
+              displayCurrentOffer();
+            }, 5000);
+          }
+        } else {
+          offerBanner.style.display = 'none';
+        }
+      } catch (err) {
+        console.error('فشل تحميل العروض:', err);
+        offerBanner.style.display = 'none';
       }
+    }
+
+    // دالة لعرض العرض الحالي
+    function displayCurrentOffer() {
+      if (allOffers.length === 0) return;
+      
+      const offer = allOffers[currentOfferIndex];
+      const offerContent = document.getElementById('offerContent');
+      const offerTitle = document.querySelector('.offer-title span:not(.offer-icon)');
+      
+      if (offerTitle) {
+        offerTitle.textContent = offer.title || 'العروض الحالية';
+      }
+      offerContent.textContent = offer.content || '';
     }
 
     // دالة لتحويل الامتداد من .img إلى .jpg
@@ -359,16 +401,45 @@
 
     function recalc(){
       let total=0;
+      let itemsCount = 0;
       document.querySelectorAll('.card').forEach(card=>{
         const price=Number(card.dataset.price);
         const qty=Number(card.querySelector('.count').value||0);
         total+=price*qty;
+        itemsCount += qty;
       });
       const totalText = total===0?'0 د.ع':formatCurrency(total)+' د.ع';
       const totalEl = document.getElementById('total');
       const cartTotalEl = document.getElementById('cartTotal');
       if (totalEl) totalEl.textContent = totalText;
       if (cartTotalEl) cartTotalEl.textContent = totalText;
+      // تحديث عداد العناصر
+      const cartCountEl = document.getElementById('cartCount');
+      if (cartCountEl) {
+        if (itemsCount > 0) {
+          cartCountEl.style.display = 'inline-block';
+          cartCountEl.textContent = itemsCount;
+        } else {
+          cartCountEl.style.display = 'none';
+          cartCountEl.textContent = '0';
+        }
+      }
+      // إظهار/إخفاء زر العربة حسب وجود عناصر
+      const cartButton = document.getElementById('cartButton');
+      const cartPanel = document.getElementById('cartPanel');
+      if (cartButton) {
+        if (itemsCount > 0) {
+          cartButton.style.display = 'flex';
+        } else {
+          cartButton.style.display = 'none';
+          // أغلق اللوحة إذا كانت مفتوحة
+          if (cartPanel && cartPanel.classList.contains('open')) {
+            cartPanel.classList.remove('open');
+            cartPanel.setAttribute('aria-hidden', 'true');
+            cartButton.setAttribute('aria-expanded', 'false');
+          }
+        }
+      }
       return total;
     }
 
@@ -377,6 +448,7 @@
       const cartButton = document.getElementById('cartButton');
       const cartPanel = document.getElementById('cartPanel');
       const closeCartPanel = document.getElementById('closeCartPanel');
+      const cartCountEl = document.getElementById('cartCount');
 
       if (!cartButton || !cartPanel) return;
 
@@ -449,39 +521,68 @@
         return;
       }
 
-      let msg='طلب من شركة دجلة للصناعات الدوائية%0A';
-      msg+='------------------------------%0A';
-      msg+='ت  |  المادة  |  النوع  |  الكمية  |  السعر  |  الإجمالي%0A';
-      msg+='------------------------------%0A';
-      items.forEach((it, index)=>{
-        msg+=`${index + 1}  |  ${it.n}  |  ${it.t}  |  ${it.q}  |  ${formatCurrency(it.p)}  |  ${formatCurrency(it.p * it.q)} د.ع%0A`;
-      });
-      msg+='------------------------------%0A';
-      msg+=`الإجمالي الكلي: ${formatCurrency(total)} د.ع%0A%0A`;
-      msg+=`معلومات العميل:%0A`;
-      msg+=`الاسم: ${name}%0A`;
-      msg+=`رقم الهاتف: ${phone}%0A`;
-      msg+=`العنوان: ${address||'—'}%0A`;
-      if(notes) msg+=`ملاحظات: ${notes}%0A`;
-      msg+='%0Aشكراً لتعاملكم مع شركة دجلة للصناعات الدوائية';
+      // بناء رسالة أكثر ترتيباً واحترافية ثم ترميزها لإرسالها عبر واتساب
+      const now = new Date();
+      const timestamp = now.toLocaleString('ar-IQ');
 
-      // إرسال الطلب
-      const waLink=`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
-      window.open(waLink,'_blank');
+      let msg = `📦 *طلب جديد - شركة دجلة للصناعات الدوائية*\n`;
+      msg += `📅 التاريخ: ${timestamp}\n`;
+      msg += `🆔 الرقم المرجعي: #${Date.now().toString().slice(-6)}\n`;
+      msg += '═══════════════════════════════════════════\n\n';
+      msg += '*🛒 تفاصيل المنتجات:*\n\n';
+
+      items.forEach((it, index) => {
+        const lineTotal = it.p * it.q;
+        msg += `*${index + 1}. ${it.n}*\n`;
+        msg += `   📋 النوع: ${it.t}\n`;
+        msg += `   🏷️  السعر: ${formatCurrency(it.p)} د.ع\n`;
+        msg += `   🔢 الكمية: ${it.q}\n`;
+        msg += `   💰 الإجمالي: ${formatCurrency(lineTotal)} د.ع\n`;
+        msg += `   ─────────────────────\n`;
+      });
+
+      msg += '\n*💰 الملخص المالي:*\n';
+      msg += `   المجموع الكلي: *${formatCurrency(total)} د.ع*\n`;
+      msg += '═══════════════════════════════════════════\n\n';
+      msg += '*👤 معلومات العميل:*\n\n';
+      msg += `   🏢 اسم الصيدلية: ${name}\n`;
+      msg += `   📞 رقم الهاتف: ${phone}\n`;
+      if (address) msg += `   📍 العنوان: ${address}\n`;
+      if (notes) msg += `   📝 ملاحظات: ${notes}\n`;
+      msg += '\n═══════════════════════════════════════════\n\n';
+      
+      // إرسال الطلب — نستخدم encodeURIComponent لتفادي مشاكل الترميز
+      const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+      window.open(waLink, '_blank');
 
       // إرسال رسالة الشكر بعد ثواني قليلة
       setTimeout(() => {
         const thankMsg = 
-`عزيزنا الصيدلي المحترم ${name}،
-نود أن نعبر عن خالص شكرنا وامتناننا لثقتكم الغالية في شركة دجلة للصناعات الدوائية.
+`🎉 *شكراً لتواصلكم مع شركة دجلة للصناعات الدوائية* 🎉
 
-نؤكد لكم أن طلبكم محل اهتمامنا وسيتم التعامل معه بأقصى درجات العناية والمهنية. سيقوم فريقنا بتجهيز طلبكم وإيصاله في أسرع وقت ممكن.
+عزيزنا الصيدلي المحترم *${name}*،
+
+نود أن نعبر عن خالص شكرنا وامتناننا لثقتكم الغالية في منتجاتنا وخدماتنا.
+
+*📋 حالة الطلب:*
+✅ تم استلام الطلب بنجاح
+⏳ قيد المعالجة والتجهيز
+
+
+*📞 للاستفسار:*
+يمكنكم التواصل معنا على الرقم: *${WHATSAPP_NUMBER}*
+
+*⏰ أوقات العمل:*
+الأحد - الخميس: 8:00 ص - 5:00 م
 
 نحن نفخر بخدمتكم ونتطلع دائماً لتقديم أفضل المنتجات وأجود الخدمات لكم.
 
-معاً نحو صناعة دوائية عراقية متطورة 🌟
-فريق خدمة العملاء - شركة دجلة للصناعات الدوائية
-مندوب: محافظة الديوانية`;
+*⚕️ معاً نحو صناعة دوائية عراقية متطورة ⚕️*
+
+*فريق خدمة العملاء*
+*شركة دجلة للصناعات الدوائية*
+*مندوب: محافظة الديوانية*
+📞 ${WHATSAPP_NUMBER}`;
 
         const thanksLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(thankMsg)}`;
         window.open(thanksLink,'_blank');
