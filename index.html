@@ -481,83 +481,135 @@
         }
       });
     })();
+document.getElementById('send').addEventListener('click',async()=>{
+  const name=document.getElementById('custName').value.trim();
+  const phone=document.getElementById('custPhone').value.trim();
+  const address=document.getElementById('custAddress').value.trim();
+  const notes=document.getElementById('custNotes').value.trim();
 
-    document.getElementById('send').addEventListener('click',()=>{
-      const name=document.getElementById('custName').value.trim();
-      const phone=document.getElementById('custPhone').value.trim();
-      const address=document.getElementById('custAddress').value.trim();
-      const notes=document.getElementById('custNotes').value.trim();
+  // التحقق من صحة رقم الهاتف
+  if(!/^(\+?964|0)?7[0-9]{9}$/.test(phone.replace(/\s/g, ''))) {
+    alert('الرجاء إدخال رقم هاتف عراقي صحيح');
+    return;
+  }
 
-      // التحقق من صحة رقم الهاتف
-      if(!/^(\+?964|0)?7[0-9]{9}$/.test(phone.replace(/\s/g, ''))) {
-        alert('الرجاء إدخال رقم هاتف عراقي صحيح');
-        return;
-      }
+  // التحقق من اسم الصيدلية
+  if(name.length < 3) {
+    alert('الرجاء إدخال اسم صيدلية صحيح');
+    return;
+  }
 
-      // التحقق من اسم الصيدلية
-      if(name.length < 3) {
-        alert('الرجاء إدخال اسم صيدلية صحيح');
-        return;
-      }
+  const items=[];let total=0;
+  document.querySelectorAll('.card').forEach(card=>{
+    const n=card.dataset.name;
+    const t=card.dataset.type;
+    const p=Number(card.dataset.price);
+    const q=Number(card.querySelector('.count').value||0);
+    if(q>0){
+      items.push({n,t,p,q});
+      total+=p*q;
+    }
+  });
 
-      const items=[];let total=0;
-      document.querySelectorAll('.card').forEach(card=>{
-        const n=card.dataset.name;
-        const t=card.dataset.type;
-        const p=Number(card.dataset.price);
-        const q=Number(card.querySelector('.count').value||0);
-        if(q>0){
-          items.push({n,t,p,q});
-          total+=p*q;
-        }
-      });
+  if(items.length===0){
+    alert('لم يتم إضافة أي منتجات للطلب. الرجاء اختيار المنتجات وتحديد الكميات المطلوبة قبل إرسال الطلب.');
+    return;
+  }
+  if(!name||!phone){
+    alert('الرجاء إدخال الاسم ورقم الهاتف.');
+    return;
+  }
 
-      if(items.length===0){
-        alert('لم يتم إضافة أي منتجات للطلب. الرجاء اختيار المنتجات وتحديد الكميات المطلوبة قبل إرسال الطلب.');
-        return;
-      }
-      if(!name||!phone){
-        alert('الرجاء إدخال الاسم ورقم الهاتف.');
-        return;
-      }
+  // بناء رسالة أكثر ترتيباً واحترافية ثم ترميزها لإرسالها عبر واتساب
+  const now = new Date();
+  const timestamp = now.toLocaleString('ar-IQ');
+  const orderId = Date.now().toString().slice(-6);
 
-      // بناء رسالة أكثر ترتيباً واحترافية ثم ترميزها لإرسالها عبر واتساب
-      const now = new Date();
-      const timestamp = now.toLocaleString('ar-IQ');
+  let msg = `📦 *طلب جديد - شركة دجلة للصناعات الدوائية*\n`;
+  msg += `📅 التاريخ: ${timestamp}\n`;
+  msg += `🆔 الرقم المرجعي: #${orderId}\n`;
+  msg += '═══════════════════════════════════════════\n\n';
+  msg += '*🛒 تفاصيل المنتجات:*\n\n';
 
-      let msg = `📦 *طلب جديد - شركة دجلة للصناعات الدوائية*\n`;
-      msg += `📅 التاريخ: ${timestamp}\n`;
-      msg += `🆔 الرقم المرجعي: #${Date.now().toString().slice(-6)}\n`;
-      msg += '═══════════════════════════════════════════\n\n';
-      msg += '*🛒 تفاصيل المنتجات:*\n\n';
+  items.forEach((it, index) => {
+    const lineTotal = it.p * it.q;
+    msg += `*${index + 1}. ${it.n}*\n`;
+    msg += `   📋 النوع: ${it.t}\n`;
+    msg += `   🏷️  السعر: ${formatCurrency(it.p)} د.ع\n`;
+    msg += `   🔢 الكمية: ${it.q}\n`;
+    msg += `   💰 الإجمالي: ${formatCurrency(lineTotal)} د.ع\n`;
+    msg += `   ─────────────────────\n`;
+  });
 
-      items.forEach((it, index) => {
-        const lineTotal = it.p * it.q;
-        msg += `*${index + 1}. ${it.n}*\n`;
-        msg += `   📋 النوع: ${it.t}\n`;
-        msg += `   🏷️  السعر: ${formatCurrency(it.p)} د.ع\n`;
-        msg += `   🔢 الكمية: ${it.q}\n`;
-        msg += `   💰 الإجمالي: ${formatCurrency(lineTotal)} د.ع\n`;
-        msg += `   ─────────────────────\n`;
-      });
+  msg += '\n*💰 الملخص المالي:*\n';
+  msg += `   المجموع الكلي: *${formatCurrency(total)} د.ع*\n`;
+  msg += '═══════════════════════════════════════════\n\n';
+  msg += '*👤 معلومات العميل:*\n\n';
+  msg += `   🏢 اسم الصيدلية: ${name}\n`;
+  msg += `   📞 رقم الهاتف: ${phone}\n`;
+  if (address) msg += `   📍 العنوان: ${address}\n`;
+  if (notes) msg += `   📝 ملاحظات: ${notes}\n`;
+  msg += '\n═══════════════════════════════════════════\n\n';
+ 
+  // إرسال الطلب — نستخدم encodeURIComponent لتفادي مشاكل الترميز
+  const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+  
+  // حفظ بيانات الطلب مؤقتاً
+  const orderData = {
+    name,
+    phone,
+    address,
+    notes,
+    items,
+    total,
+    orderId,
+    timestamp
+  };
+  
+  // تخزين البيانات مؤقتاً في localStorage
+  localStorage.setItem('lastOrder', JSON.stringify(orderData));
+  
+  // فتح نافذة الطلب الرئيسية
+  const orderWindow = window.open(waLink, '_blank');
+  
+  if (orderWindow) {
+    // إظهار رسالة تأكيد للعميل
+    alert(`✅ تم إرسال طلبك بنجاح!\nالرقم المرجعي: #${orderId}\n\nسيتم إرسال رسالة شكر تلقائية خلال 3 ثواني...`);
+    
+    // انتظار 3 ثواني ثم إرسال رسالة الشكر
+    setTimeout(() => {
+      sendThankYouMessage(name, phone);
+    }, 3000);
+    
+    // إغلاق لوحة السلة
+    const cartPanel = document.getElementById('cartPanel');
+    const cartButton = document.getElementById('cartButton');
+    if (cartPanel && cartButton) {
+      cartPanel.classList.remove('open');
+      cartPanel.setAttribute('aria-hidden', 'true');
+      cartButton.setAttribute('aria-expanded', 'false');
+    }
+    
+    // تفريغ السلة
+    document.querySelectorAll('.card .count').forEach(input => {
+      input.value = 0;
+    });
+    recalc();
+    
+    // تفريغ النموذج
+    document.getElementById('custName').value = '';
+    document.getElementById('custPhone').value = '';
+    document.getElementById('custAddress').value = '';
+    document.getElementById('custNotes').value = '';
+    
+  } else {
+    alert('⚠️ يرجى السماح بفتح النوافذ المنبثقة في المتصفح لضمان إرسال الرسائل');
+  }
+});
 
-      msg += '\n*💰 الملخص المالي:*\n';
-      msg += `   المجموع الكلي: *${formatCurrency(total)} د.ع*\n`;
-      msg += '═══════════════════════════════════════════\n\n';
-      msg += '*👤 معلومات العميل:*\n\n';
-      msg += `   🏢 اسم الصيدلية: ${name}\n`;
-      msg += `   📞 رقم الهاتف: ${phone}\n`;
-      if (address) msg += `   📍 العنوان: ${address}\n`;
-      if (notes) msg += `   📝 ملاحظات: ${notes}\n`;
-      msg += '\n═══════════════════════════════════════════\n\n';
-      
-      // إرسال الطلب — نستخدم encodeURIComponent لتفادي مشاكل الترميز
-      const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-      window.open(waLink, '_blank');
-
-      // إرسال رسالة الشكر بعد ثواني قليلة
-      setTimeout(() => {
-        const thankMsg = 
+// دالة منفصلة لإرسال رسالة الشكر
+function sendThankYouMessage(name, phone) {
+  const thankMsg = 
 `🎉 *شكراً لتواصلكم مع شركة دجلة للصناعات الدوائية* 🎉
 
 عزيزنا الصيدلي المحترم *${name}*،
@@ -567,13 +619,14 @@
 *📋 حالة الطلب:*
 ✅ تم استلام الطلب بنجاح
 ⏳ قيد المعالجة والتجهيز
-
+🚚 سيتم التواصل معكم خلال 24 ساعة لتحديد موعد التسليم
 
 *📞 للاستفسار:*
 يمكنكم التواصل معنا على الرقم: *${WHATSAPP_NUMBER}*
 
 *⏰ أوقات العمل:*
 الأحد - الخميس: 8:00 ص - 5:00 م
+الجمعة: 8:00 ص - 1:00 م
 
 نحن نفخر بخدمتكم ونتطلع دائماً لتقديم أفضل المنتجات وأجود الخدمات لكم.
 
@@ -584,10 +637,56 @@
 *مندوب: محافظة الديوانية*
 📞 ${WHATSAPP_NUMBER}`;
 
-        const thanksLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(thankMsg)}`;
-        window.open(thanksLink,'_blank');
-      }, 3000); // إرسال بعد 3 ثواني
-    });
+  const thanksLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(thankMsg)}`;
+  
+  // فتح رسالة الشكر في نافذة جديدة
+  const thanksWindow = window.open(thanksLink, '_blank');
+  
+  if (!thanksWindow) {
+    // إذا فشل فتح النافذة، نعرض زر لإرسال يدوي
+    const manualSend = confirm(
+      '⚠️ لم نتمكن من إرسال رسالة الشكر تلقائياً.\n\n' +
+      'هل ترغب في نسخ رابط رسالة الشكر لإرسالها يدوياً؟'
+    );
+    
+    if (manualSend) {
+      // نسخ الرابط إلى الحافظة
+      navigator.clipboard.writeText(thankMsg).then(() => {
+        alert('✅ تم نسخ رسالة الشكر إلى الحافظة.\nيمكنك لصقها في واتساب وإرسالها يدوياً.');
+      }).catch(() => {
+        // عرض النص للنسخ يدوياً
+        prompt('انسخ النص التالي وأرسله عبر واتساب:', thankMsg);
+      });
+    }
+  }
+}
+
+// يمكنك أيضاً إضافة زر لإعادة إرسال رسالة الشكر في حالة الفشل
+function addRetryThankYouButton() {
+  const lastOrder = localStorage.getItem('lastOrder');
+  if (lastOrder) {
+    const orderData = JSON.parse(lastOrder);
+    
+    // إضافة زر في لوحة السلة
+    const cartPanelContent = document.querySelector('.cart-panel-content form');
+    if (cartPanelContent) {
+      const retryButton = document.createElement('button');
+      retryButton.type = 'button';
+      retryButton.className = 'btn';
+      retryButton.style.background = '#28a745';
+      retryButton.textContent = '🔄 إعادة إرسال رسالة الشكر';
+      retryButton.onclick = () => {
+        sendThankYouMessage(orderData.name, orderData.phone);
+      };
+      cartPanelContent.appendChild(retryButton);
+    }
+  }
+}
+
+// استدعاء الدالة عند تحميل الصفحة
+window.addEventListener('load', () => {
+  setTimeout(addRetryThankYouButton, 1000);
+});
 
     // تحميل العرض والمنتجات عند بدء التشغيل
     loadOffer();
