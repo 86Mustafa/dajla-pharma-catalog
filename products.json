@@ -1,5 +1,12 @@
 [
     {
+        "name": "ACTIVE-DIJ 100ml ",
+        "type": "syrup",
+        "price": 750,
+        "image": "Active-d.jpg",
+        "disabled": false
+    },
+    {
         "name": "PARASTOL-D 500mg ",
         "type": "tab",
         "price": 180,
@@ -32,14 +39,14 @@
         "type": "tab",
         "price": 185,
         "image": "PRESILON.jpg",
-        "disabled": true
+        "disabled": false
     },
     {
         "name": "DR- STELABIDZ ",
         "type": "tab",
         "price": 178,
         "image": "STELABIDZ .jpg",
-        "disabled": true
+        "disabled": false
     },
     {
         "name": "SPASMOBAN باكيت",
