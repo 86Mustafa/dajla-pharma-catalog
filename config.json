@@ -1,0 +1,24 @@
+{
+  "brand": {
+    "name": "شركة دجلة للصناعات الدوائية / محافظة الديوانية",
+    "tagline": "اطلب عبر واتساب بسرعة وسهولة",
+    "color": "#0b63b3",
+    "logo": ""
+  },
+  "whatsapp": "9647829403402",
+  "currency": "د.ع",
+  "countryCode": "964",
+  "phonePattern": "^7\\d{9}$",
+  "maxQty": 999,
+  "categories": {
+    "tab": "أقراص", "cream": "كريم", "ointment": "مرهم",
+    "syrup": "شراب", "susp": "معلّق", "drop": "قطرة"
+  },
+  "customerFields": [
+    { "id": "name", "label": "اسم الصيدلية", "required": true },
+    { "id": "phone", "label": "رقم الهاتف", "required": true, "type": "tel" },
+    { "id": "address", "label": "العنوان" },
+    { "id": "notes", "label": "ملاحظات التجهيز (اسم المذخر)", "type": "textarea" }
+  ],
+  "messageTemplate": "📦 *طلب جديد - {brand}*\n📅 {date}\n🆔 #{orderId}\n\n*🛒 المنتجات:*\n{items}\n\n*💰 المجموع الكلي: {total}*\n\n*👤 معلومات العميل:*\n{customer}"
+}
