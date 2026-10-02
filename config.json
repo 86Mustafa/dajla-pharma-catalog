@@ -43,16 +43,12 @@
   "messageTemplate": "📦 *طلب جديد - {brand}*\n📅 {date}\n{warehouse}🆔 #{orderId}\n\n*🛒 المنتجات:*\n{items}\n\n*💰 المجموع الكلي: {total}*\n\n*👤 معلومات العميل:*\n{customer}",
   "priceLists": [
     {
-      "id": "base",
-      "name": "السعر الأساسي (الشركة)"
-    },
-    {
-      "id": "Dhurgam",
-      "name": "مذخر الزهراء (مثال)"
+         "id": "Dhurgam",
+      "name": "Dhurgam"
     },
     {
       "id": "Dhamin",
-      "name": "",
+      "name": " Dhamin ",
       "strict": true,
       "whatsapp": ""
     }
