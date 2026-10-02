@@ -18,7 +18,8 @@ const norm = s => String(s).toLowerCase().replace(/[\s\-–—_/().]+/g, '');   
 const lists = () => cfg.priceLists || [];
 const curList = () => lists().find(l => l.id === cur) || {};
 function priceOf(p) {   // السعر حسب المذخر المختار، و null = غير متوفر لديه
-  const o = priceMap[cur] && priceMap[cur][norm(p.name)];
+  const m = priceMap[cur] || {};
+  const o = m[norm(p.name) + '::' + p.type] ?? m[norm(p.name)];   // الاسم+النوع أولاً ثم الاسم فقط
   if (o != null) return Number(o);
   return curList().strict ? null : p.price;
 }
@@ -147,7 +148,7 @@ async function init() {
     priceMap[k] = {};
     for (const n in raw[k]) {
       priceMap[k][norm(n)] = raw[k][n];
-      if (!products.some(p => norm(p.name) === norm(n))) console.warn('pricelists.json: اسم لا يطابق أي منتج ->', k, '|', n);
+      if (!products.some(p => norm(p.name) === norm(n.split('::')[0]))) console.warn('pricelists.json: اسم لا يطابق أي منتج ->', k, '|', n);
     }
     if (!lists().some(l => l.id === k)) console.warn('pricelists.json: القائمة غير معرّفة في config.json ->', k);
   }
