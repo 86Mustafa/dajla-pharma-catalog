@@ -11,14 +11,50 @@
   "phonePattern": "^7\\d{9}$",
   "maxQty": 999,
   "categories": {
-    "tab": "أقراص", "cream": "كريم", "ointment": "مرهم",
-    "syrup": "شراب", "susp": "معلّق", "drop": "قطرة"
+    "tab": "أقراص",
+    "cream": "كريم",
+    "ointment": "مرهم",
+    "syrup": "شراب",
+    "susp": "معلّق",
+    "drop": "قطرة"
   },
   "customerFields": [
-    { "id": "name", "label": "اسم الصيدلية", "required": true },
-    { "id": "phone", "label": "رقم الهاتف", "required": true, "type": "tel" },
-    { "id": "address", "label": "العنوان" },
-    { "id": "notes", "label": "ملاحظات التجهيز (اسم المذخر)", "type": "textarea" }
+    {
+      "id": "name",
+      "label": "اسم الصيدلية",
+      "required": true
+    },
+    {
+      "id": "phone",
+      "label": "رقم الهاتف",
+      "required": true,
+      "type": "tel"
+    },
+    {
+      "id": "address",
+      "label": "العنوان"
+    },
+    {
+      "id": "notes",
+      "label": "ملاحظات التجهيز",
+      "type": "textarea"
+    }
   ],
-  "messageTemplate": "📦 *طلب جديد - {brand}*\n📅 {date}\n🆔 #{orderId}\n\n*🛒 المنتجات:*\n{items}\n\n*💰 المجموع الكلي: {total}*\n\n*👤 معلومات العميل:*\n{customer}"
+  "messageTemplate": "📦 *طلب جديد - {brand}*\n📅 {date}\n{warehouse}🆔 #{orderId}\n\n*🛒 المنتجات:*\n{items}\n\n*💰 المجموع الكلي: {total}*\n\n*👤 معلومات العميل:*\n{customer}",
+  "priceLists": [
+    {
+      "id": "base",
+      "name": "السعر الأساسي (الشركة)"
+    },
+    {
+      "id": "Dhurgam",
+      "name": "مذخر الزهراء (مثال)"
+    },
+    {
+      "id": "Dhamin",
+      "name": "",
+      "strict": true,
+      "whatsapp": ""
+    }
+  ]
 }

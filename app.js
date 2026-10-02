@@ -7,11 +7,21 @@ const load = async url => { const r = await fetch(url); if (!r.ok) throw new Err
 const PH = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><rect width="120" height="120" fill="#f0f0f0"/></svg>');
 
 // ===== الحالة (State): مصدر الحقيقة الوحيد =====
-let cfg = {}, products = [], cat = 'all', q = '';
+let cfg = {}, products = [], cat = 'all', q = '', priceMap = {}, cur = '';
 let cart = JSON.parse(localStorage.getItem('cart_v1') || '{}');   // { productId: qty }
 const money = n => fmt(n) + ' ' + (cfg.currency || '');
 const byId = id => products.find(p => p.id === id);
 const label = t => (cfg.categories && cfg.categories[t]) || t;
+
+// ===== قوائم الأسعار حسب المذخر/المورد =====
+const lists = () => cfg.priceLists || [];
+const curList = () => lists().find(l => l.id === cur) || {};
+function priceOf(p) {   // السعر حسب المذخر المختار، و null = غير متوفر لديه
+  const o = priceMap[cur] && priceMap[cur][p.name];
+  if (o != null) return Number(o);
+  return curList().strict ? null : p.price;
+}
+const avail = p => !p.disabled && priceOf(p) != null;
 
 function saveCart() { localStorage.setItem('cart_v1', JSON.stringify(cart)); }
 function setQty(id, n) {
@@ -22,7 +32,7 @@ function setQty(id, n) {
 function clearCart() { cart = {}; saveCart(); render(); }
 function totals() {
   let t = 0, c = 0;
-  for (const id in cart) { const p = byId(id); if (p) { t += p.price * cart[id]; c += cart[id]; } }
+  for (const id in cart) { const p = byId(id); if (p && avail(p)) { t += priceOf(p) * cart[id]; c += cart[id]; } }
   return { t, c };
 }
 
@@ -49,11 +59,11 @@ function drawGrid() {
   $('#status').textContent = list.length ? '' : 'لا توجد نتائج';
   for (const p of list) {
     const img = el('img', { loading: 'lazy', alt: p.name, src: imgSrc(p), onclick: () => zoom(p), onerror() { this.onerror = null; this.src = PH; } });
-    g.append(el('article', { className: 'card' + (p.disabled ? ' off' : '') }, img,
+    g.append(el('article', { className: 'card' + (!avail(p) ? ' off' : '') }, img,
       el('div', { className: 'name', textContent: p.name }),
       el('div', { className: 'type', textContent: label(p.type) }),
-      el('div', { className: 'price', textContent: money(p.price) }),
-      p.disabled ? el('div', { className: 'type', textContent: 'غير متوفر' }) : stepper(p.id)));
+      el('div', { className: 'price', textContent: priceOf(p) == null ? '—' : money(priceOf(p)) }),
+      !avail(p) ? el('div', { className: 'type', textContent: p.disabled ? 'غير متوفر' : 'غير متوفر لدى هذا المذخر' }) : stepper(p.id)));
   }
 }
 // يحدّث كل شيء من الحالة (السلة) فقط
@@ -66,7 +76,7 @@ function render() {
   for (const id in cart) {
     const p = byId(id); if (!p) continue;
     L.append(el('div', { className: 'line' }, el('div', { className: 'n', textContent: p.name }), stepper(id),
-      el('div', { className: 's', textContent: fmt(p.price * cart[id]) }),
+      el('div', { className: 's', textContent: avail(p) ? fmt(priceOf(p) * cart[id]) : 'غير متوفر' }),
       el('button', { className: 'x2', textContent: '🗑', title: 'حذف', onclick: () => setQty(id, 0) })));
   }
   if (!c) $('#panel').classList.remove('open');
@@ -101,14 +111,14 @@ function sendOrder() {
     const n = digits(v.phone).replace(new RegExp('^(00)?' + (cfg.countryCode || '')), '').replace(/^0/, '');
     if (!new RegExp(cfg.phonePattern).test(n)) return alert('رقم الهاتف غير صحيح');
   }
-  const items = Object.keys(cart).filter(byId).map((k, i) => {
+  const items = Object.keys(cart).filter(k => byId(k) && avail(byId(k))).map((k, i) => {
     const p = byId(k), n = cart[k];
-    return `${i + 1}. *${p.name}*\n   ${n} × ${fmt(p.price)} = ${money(p.price * n)}`;
+    return `${i + 1}. *${p.name}*\n   ${n} × ${fmt(priceOf(p))} = ${money(priceOf(p) * n)}`;
   }).join('\n');
   const customer = cfg.customerFields.map(d => v[d.id] && `${d.label}: ${v[d.id]}`).filter(Boolean).join('\n');
-  const m = { brand: cfg.brand.name, date: new Date().toLocaleString('ar-IQ'), orderId: Date.now().toString().slice(-6), items, total: money(t), customer };
+  const m = { brand: cfg.brand.name, date: new Date().toLocaleString('ar-IQ'), orderId: Date.now().toString().slice(-6), warehouse: lists().length > 1 ? '🏬 المذخر: ' + curList().name + '\n' : '', items, total: money(t), customer };
   const msg = cfg.messageTemplate.replace(/\{(\w+)\}/g, (_, k) => m[k] ?? '');
-  const url = `https://wa.me/${digits(cfg.whatsapp)}?text=${encodeURIComponent(msg)}`;
+  const url = `https://wa.me/${digits(curList().whatsapp || cfg.whatsapp)}?text=${encodeURIComponent(msg)}`;
   if (!window.open(url, '_blank')) location.href = url;
   // لا نفرّغ السلة تلقائياً: قد لا يضغط المستخدم "إرسال" داخل واتساب
   $('#hint').textContent = 'بعد إرسال الرسالة في واتساب اضغط "تفريغ السلة". إن لم تُرسل بعد، سلتك محفوظة.';
@@ -130,6 +140,17 @@ async function init() {
   document.documentElement.style.setProperty('--brand', cfg.brand.color);
   $('#brand').textContent = cfg.brand.name; $('#tagline').textContent = cfg.brand.tagline || '';
   if (cfg.brand.logo) { $('#logo').src = cfg.brand.logo; $('#logo').hidden = false; }
+  priceMap = await load('pricelists.json').catch(() => ({}));
+  const L = lists();
+  cur = localStorage.getItem('list_v1');
+  if (!L.some(l => l.id === cur)) cur = L.length ? L[0].id : '';
+  if (L.length > 1) {   // يظهر اختيار المذخر فقط إذا وُجدت أكثر من قائمة
+    const s = $('#plist');
+    L.forEach(l => s.append(el('option', { value: l.id, textContent: l.name })));
+    s.value = cur;
+    s.onchange = () => { cur = s.value; localStorage.setItem('list_v1', cur); drawGrid(); render(); };
+    $('#listbar').hidden = false;
+  }
   buildForm(); drawChips(); drawGrid(); render();
 
   $('#search').oninput = e => { q = e.target.value.trim().toLowerCase(); drawGrid(); };
