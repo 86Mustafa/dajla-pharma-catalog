@@ -14,10 +14,11 @@ const byId = id => products.find(p => p.id === id);
 const label = t => (cfg.categories && cfg.categories[t]) || t;
 
 // ===== قوائم الأسعار حسب المذخر/المورد =====
+const norm = s => String(s).toLowerCase().replace(/[\s\-–—_/().]+/g, '');   // تجاهل المسافات والشرطات عند المطابقة
 const lists = () => cfg.priceLists || [];
 const curList = () => lists().find(l => l.id === cur) || {};
 function priceOf(p) {   // السعر حسب المذخر المختار، و null = غير متوفر لديه
-  const o = priceMap[cur] && priceMap[cur][p.name];
+  const o = priceMap[cur] && priceMap[cur][norm(p.name)];
   if (o != null) return Number(o);
   return curList().strict ? null : p.price;
 }
@@ -141,6 +142,16 @@ async function init() {
   $('#brand').textContent = cfg.brand.name; $('#tagline').textContent = cfg.brand.tagline || '';
   if (cfg.brand.logo) { $('#logo').src = cfg.brand.logo; $('#logo').hidden = false; }
   priceMap = await load('pricelists.json').catch(() => ({}));
+  const raw = priceMap; priceMap = {};
+  for (const k in raw) {   // مطابقة مرنة + تحذيرات في Console (F12) تكشف الأخطاء
+    priceMap[k] = {};
+    for (const n in raw[k]) {
+      priceMap[k][norm(n)] = raw[k][n];
+      if (!products.some(p => norm(p.name) === norm(n))) console.warn('pricelists.json: اسم لا يطابق أي منتج ->', k, '|', n);
+    }
+    if (!lists().some(l => l.id === k)) console.warn('pricelists.json: القائمة غير معرّفة في config.json ->', k);
+  }
+  lists().forEach(l => { if (l.id !== 'base' && !raw[l.id]) console.warn('لا توجد أسعار في pricelists.json للقائمة ->', l.id); });
   const L = lists();
   cur = localStorage.getItem('list_v1');
   if (!L.some(l => l.id === cur)) cur = L.length ? L[0].id : '';
