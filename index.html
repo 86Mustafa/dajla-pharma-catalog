@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>كتالوج دجلة للصناعات الدوائية</title>
+<meta name="description" content="اطلب أدوية شركة دجلة للصناعات الدوائية عبر واتساب بسرعة وسهولة">
+<meta name="theme-color" content="#0a6b53">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="دجلة">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preload" href="fonts/cairo-arabic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-in">
+    <div class="logo-wrap"><img id="logo" src="icons/logo.png" alt="" width="56" height="56"></div>
+    <div class="hero-text">
+      <h1 id="brand">دجلة للصناعات الدوائية</h1>
+      <p id="tagline"></p>
+    </div>
+    <button id="installBtn" class="pill" type="button" hidden><span data-i="download"></span>تثبيت</button>
+  </div>
+  <div id="offline" class="offline" role="status" hidden>أنت غير متصل بالإنترنت — الأسعار من آخر تحديث محفوظ</div>
+</header>
+
+<main class="wrap">
+  <section id="listbar" class="wh" hidden>
+    <div class="wh-h"><span data-i="store"></span><b>اختر المذخر</b><small>الأسعار تتغير حسب المذخر</small></div>
+    <div id="seg" class="seg" role="radiogroup" aria-label="المذخر"></div>
+  </section>
+
+  <button id="offer" class="offer" type="button" hidden aria-expanded="false">
+    <span class="o-ic">🎁</span>
+    <span class="o-body"><b class="o-t"></b><span class="o-x"></span></span>
+    <span class="o-chev" data-i="chev"></span>
+  </button>
+
+<div id="ios" class="ios" hidden>
+    <span>لتثبيت التطبيق على آيفون: اضغط <b>مشاركة</b> <span data-i="share"></span> ثم <b>«إضافة إلى الشاشة الرئيسية»</b></span>
+    <button type="button" id="iosX" aria-label="إغلاق">×</button>
+  </div>
+
+  <button id="reorder" class="reorder" type="button" hidden></button>
+
+  <div class="tools">
+    <label class="search">
+      <span data-i="search"></span>
+      <input id="search" type="search" placeholder="ابحث عن دواء…" autocomplete="off" enterkeyhint="search" aria-label="بحث">
+    </label>
+    <div id="chips" class="chips"></div>
+  </div>
+
+  <p id="status" class="status" aria-live="polite"></p>
+  <section id="grid" class="grid"></section>
+</main>
+
+<!-- شريط السلة السفلي -->
+<div id="bar" class="bar" hidden>
+  <div class="bar-in">
+    <div id="tier" class="tier" hidden><span id="tierTx"></span><i><u id="tierFill"></u></i></div>
+    <button id="cartBtn" class="cta" type="button">
+      <span class="cnt" id="cnt">0</span>
+      <span class="cta-t">مراجعة الطلب</span>
+      <span class="cta-sum" id="sum"></span>
+    </button>
+  </div>
+</div>
+
+<!-- نافذة مراجعة الطلب -->
+<div id="sheet" class="layer" aria-hidden="true">
+  <div class="backdrop" data-close></div>
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetT">
+    <div class="grab"></div>
+    <header class="sh-h">
+      <div><h2 id="sheetT">مراجعة الطلب</h2><p id="sheetSub"></p></div>
+      <button class="icon-btn" type="button" data-close aria-label="إغلاق"><span data-i="close"></span></button>
+    </header>
+    <div class="sh-b">
+      <div id="lines" class="lines"></div>
+      <p id="warn" class="warn" hidden></p>
+      <div id="tier2" class="tier big" hidden></div>
+      <h3 class="sec-t">بيانات الصيدلية</h3>
+      <form id="form" novalidate onsubmit="return false"></form>
+      <div id="sent" class="sent" hidden>
+        <b>تم تجهيز طلبك في واتساب 📲</b>
+        <p>هل ضغطت «إرسال» داخل واتساب؟</p>
+        <div class="row">
+          <button type="button" id="sentYes" class="btn">نعم، تفريغ السلة</button>
+          <button type="button" id="sentNo" class="btn ghost">لا، أبقِ السلة</button>
+        </div>
+      </div>
+      <button id="clear" class="link-danger" type="button">تفريغ السلة</button>
+    </div>
+    <footer class="sh-f">
+      <div class="sum"><span>الإجمالي</span><b id="total"></b></div>
+      <button id="send" class="cta wa" type="button"><span data-i="wa"></span>إرسال الطلب عبر واتساب</button>
+    </footer>
+  </section>
+</div>
+
+<!-- معاينة الصورة -->
+<div id="zoom" class="layer" aria-hidden="true">
+  <div class="backdrop" data-close></div>
+  <figure class="zbox">
+    <button class="icon-btn z-x" type="button" data-close aria-label="إغلاق"><span data-i="close"></span></button>
+    <img id="zimg" alt="">
+    <figcaption>
+      <h3 id="zname"></h3>
+      <div id="zprice" class="price"></div>
+      <div id="zact"></div>
+    </figcaption>
+  </figure>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
