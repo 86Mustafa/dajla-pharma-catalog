@@ -319,6 +319,8 @@ function skeleton() { $('#grid').replaceChildren(...Array.from({ length: 8 }, ()
 async function init() {
   document.querySelectorAll('[data-i]').forEach(n => n.innerHTML = IC[n.dataset.i] || '');
   skeleton(); setupInstall();
+  let taps = 0, tapT;   // دخول المندوب: 5 نقرات سريعة على الشعار
+  $('.logo-wrap').onclick = () => { taps++; clearTimeout(tapT); tapT = setTimeout(() => taps = 0, 1500); if (taps >= 5) location.href = 'admin.html'; };
   try { [cfg, products] = await Promise.all([load('config.json'), load('products.json')]); }
   catch (e) {
     $('#grid').replaceChildren();
