@@ -135,7 +135,11 @@ const fmtPhone = n => { n = String(n || ''); return n.startsWith('964') ? '0' + 
 function changes() {
   const out = [], bd = base.data;
   if (D.cfg.whatsapp !== bd.cfg.whatsapp) out.push(`📱 رقم واتساب الطلبات: من \u2066${fmtPhone(bd.cfg.whatsapp)}\u2069 إلى \u2066${fmtPhone(D.cfg.whatsapp)}\u2069`);
-  const rest = c => { const x = clone(c); delete x.whatsapp; (x.priceLists || []).forEach(l => delete l.whatsapp); return JSON.stringify(x); };
+  const rest = c => { const x = clone(c); delete x.whatsapp; delete x.priceLists; return JSON.stringify(x); };
+  const bl = bd.cfg.priceLists || [], dl = D.cfg.priceLists || [];
+  dl.filter(l => !bl.some(b => b.id === l.id)).forEach(l => out.push(`🏬 إضافة مذخر جديد «${l.name}»`));
+  bl.filter(b => !dl.some(l => l.id === b.id)).forEach(b => out.push(`🗑 حذف مذخر «${b.name}»`));
+  dl.forEach(l => { const b = bl.find(x => x.id === l.id); if (b && (b.name !== l.name || !!b.strict !== !!l.strict)) out.push(`🏬 تعديل مذخر «${b.name !== l.name ? b.name + ' ← ' + l.name : l.name}»`); });
   if (rest(D.cfg) !== rest(bd.cfg)) out.push('⚙️ تعديل إعدادات الواجهة (الاسم/الشعار/الأنواع)');
   const added = [], edited = [], priced = [], gone = [];
   const seen = new Set();
@@ -152,6 +156,7 @@ function changes() {
   if (edited.length) out.push(`✏️ أصناف معدّلة (${edited.length}): ${edited.slice(0, 4).join('، ')}${edited.length > 4 ? '…' : ''}`);
   if (priced.length) out.push(`💰 السعر الأساسي تغيّر لـ ${priced.length} صنف`);
   for (const l of lists()) {
+    if (!bl.some(b => b.id === l.id)) continue;
     const a = D.pricelists[l.id] || {}, b = bd.pricelists[l.id] || {}; let n = 0;
     for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) if (a[k] !== b[k]) n++;
     if (n) out.push(`🏬 أسعار مذخر «${l.name}»: ${n} تغيير`);
@@ -162,6 +167,8 @@ function changes() {
 function validate() {
   const errs = [], seen = new Set();
   if (!/^9647\d{9}$/.test(D.cfg.whatsapp || '')) errs.push('رقم الواتساب غير صحيح');
+  const wn = new Set();
+  for (const l of lists()) { const k = norm(l.name || ''); if (!k) errs.push('يوجد مذخر بلا اسم'); else if (wn.has(k)) errs.push(`اسم مذخر مكرر: ${l.name}`); wn.add(k); }
   for (const p of D.products) {
     const nm = p.name.trim();
     if (!nm) errs.push('يوجد صنف بلا اسم');
@@ -458,8 +465,11 @@ function drawPrices() {
 
 // ---------- تبويب العروض ----------
 function tabOffers(m) {
-  m.append(el('h3', { className: 'h2', textContent: 'نصوص العروض (تظهر في أعلى التطبيق)' }), el('div', { id: 'ofl' }),
-    el('button', { type: 'button', className: 'btn ghost sm', onclick: () => { D.offers.offers.push({ title: 'عرض', content: '' }); touch(); drawOffers(); } }, icon('plus'), 'إضافة عرض'),
+  m.append(el('h3', { className: 'h2', textContent: 'نصوص العروض (تظهر في أعلى التطبيق)' }),
+    el('p', { style: 'color:var(--muted);font-size:13px;margin:-4px 2px 8px', textContent: 'العرض العام يظهر للجميع. وعرض المذخر يظهر مع العرض العام عند اختيار ذلك المذخر فقط.' }), el('div', { id: 'ofl' }),
+    el('div', { className: 'row', style: 'flex-wrap:wrap' },
+      el('button', { type: 'button', className: 'btn ghost sm', onclick: () => { D.offers.offers.push({ title: 'عرض', content: '' }); touch(); drawOffers(); } }, icon('plus'), 'عرض عام'),
+      el('button', { type: 'button', className: 'btn ghost sm', onclick: () => { if (!lists().length) return toast('لا توجد مذاخر'); D.offers.offers.push({ title: 'عرض', content: '', list: lists()[0].id }); touch(); drawOffers(); } }, icon('plus'), 'عرض لمذخر معيّن')),
     el('h3', { className: 'h2', textContent: 'مستويات البونص (شريط التقدّم أسفل التطبيق)' }), el('div', { id: 'tiers' }),
     el('button', { type: 'button', className: 'btn ghost sm', onclick: () => { D.offers.tiers.push({ at: 1000000, label: '' }); touch(); drawOffers(); } }, icon('plus'), 'إضافة مستوى'));
   drawOffers();
@@ -467,6 +477,9 @@ function tabOffers(m) {
 function drawOffers() {
   const O = $('#ofl'), T = $('#tiers'); O.replaceChildren(); T.replaceChildren();
   D.offers.offers.forEach((o, i) => O.append(el('div', { className: 'box' },
+    el('div', { className: 'fld' }, el('label', { textContent: 'يظهر عند اختيار' }),
+      el('select', { onchange: e => { if (e.target.value) o.list = e.target.value; else delete o.list; touch(); } },
+        el('option', { value: '', textContent: 'كل المذاخر (عرض عام)', selected: !o.list }), ...lists().map(l => el('option', { value: l.id, textContent: 'مذخر ' + l.name, selected: o.list === l.id })))),
     el('div', { className: 'fld' }, el('label', { textContent: 'العنوان' }), el('input', { value: o.title || '', oninput: e => { o.title = e.target.value; touch(); } })),
     el('div', { className: 'fld' }, el('label', { textContent: 'نص العرض' }), el('textarea', { value: o.content || '', oninput: e => { o.content = e.target.value; touch(); } })),
     el('button', { type: 'button', className: 'btn danger sm', onclick: async () => { if (await confirmBox('حذف هذا العرض؟', 'حذف')) { D.offers.offers.splice(i, 1); touch(); drawOffers(); } } }, icon('trash'), 'حذف'))));
@@ -498,7 +511,31 @@ function tabSettings(m) {
     el('div', { className: 'fld' }, el('input', { value: v, 'aria-label': 'اسم النوع', oninput: e => { D.cfg.categories[k] = e.target.value; touch(); } }))))); };
   drawCats();
   const newCat = el('input', { placeholder: 'اسم نوع جديد (مثل: حقن)' });
+  const wbox = el('div', {});
+  for (const l of lists()) wbox.append(el('div', { className: 'box' },
+    el('div', { className: 'rowline' },
+      el('div', { className: 'fld' }, el('label', { textContent: 'اسم المذخر' }), el('input', { value: l.name, oninput: e => { l.name = e.target.value; touch(); } })),
+      el('button', { type: 'button', className: 'ib del', style: 'margin-top:24px', attrs: { 'aria-label': 'حذف المذخر' }, onclick: () => removeWh(l) }, icon('trash'))),
+    el('div', { className: 'fld', style: 'margin:0' }, el('label', { textContent: 'الأصناف غير المسعّرة لدى هذا المذخر' }),
+      el('select', { onchange: e => { if (e.target.value === 'strict') l.strict = true; else delete l.strict; touch(); } },
+        el('option', { value: 'base', textContent: 'تظهر بالسعر الأساسي', selected: !l.strict }), el('option', { value: 'strict', textContent: 'تظهر «غير متوفر»', selected: !!l.strict }))),
+    el('small', { style: 'display:block;color:var(--muted);margin-top:6px', textContent: `الأصناف المسعّرة: ${Object.keys(D.pricelists[l.id] || {}).length}` })));
+  const newW = el('input', { placeholder: 'اسم مذخر جديد' });
+  const copyW = el('select', {}, el('option', { value: '', textContent: 'قائمة أسعار فارغة' }), ...lists().map(l => el('option', { value: l.id, textContent: 'نسخ أسعار ' + l.name })));
+  const addW = () => {
+    const name = newW.value.trim(); if (!name) return toast('اكتب اسم المذخر');
+    if (lists().some(l => norm(l.name) === norm(name))) return toast('يوجد مذخر بنفس الاسم');
+    const id = 'w' + Date.now().toString(36);
+    D.cfg.priceLists = D.cfg.priceLists || []; D.cfg.priceLists.push({ id, name });
+    D.pricelists[id] = copyW.value ? clone(D.pricelists[copyW.value] || {}) : {};
+    touch(); drawTab(); toast('أُضيف المذخر — عدّل أسعاره من تبويب «الأسعار»');
+  };
   m.append(el('div', { className: 'box' }, phF),
+    el('h3', { className: 'h2', textContent: 'المذاخر (قوائم الأسعار)' }), wbox,
+    el('div', { className: 'box' }, el('b', { textContent: 'إضافة مذخر' }),
+      el('div', { className: 'rowline', style: 'margin-top:8px' }, el('div', { className: 'fld' }, newW), el('div', { className: 'fld' }, copyW)),
+      el('button', { type: 'button', className: 'btn sm', onclick: addW }, icon('plus'), 'إضافة'),
+      el('small', { style: 'display:block;color:var(--muted);margin-top:8px', textContent: 'يظهر اختيار المذخر في التطبيق عند وجود مذخرين أو أكثر.' })),
     el('h3', { className: 'h2', textContent: 'هوية التطبيق' }),
     el('div', { className: 'box' }, brand('s_b1', 'الاسم المختصر (يظهر في الترويسة)', 'short'), brand('s_b2', 'الاسم الكامل (يظهر في رسالة الطلب)', 'name'), brand('s_b3', 'العبارة الترحيبية', 'tagline')),
     el('h3', { className: 'h2', textContent: 'أنواع الأصناف' }), el('div', { className: 'box' }, cats,
@@ -510,6 +547,14 @@ function tabSettings(m) {
       el('button', { type: 'button', className: 'btn ghost sm', textContent: 'تنزيل نسخة احتياطية', onclick: backup }),
       el('button', { type: 'button', className: 'btn ghost sm', textContent: 'السجل والاسترجاع', onclick: openHistory })),
     el('div', { className: 'box', style: 'font-size:13px;color:var(--muted)' }, `المستودع: ${RP} (الفرع ${BR}) — آخر نسخة منشورة: ${base.commit.slice(0, 7)}`));
+}
+async function removeWh(l) {
+  if (lists().length < 2) return toast('يجب أن يبقى مذخر واحد على الأقل');
+  const n = D.offers.offers.filter(o => o.list === l.id).length;
+  if (!await confirmBox(`حذف مذخر «${l.name}» مع قائمة أسعاره${n ? ` و${n} عرض خاص به` : ''}؟`, 'حذف')) return;
+  D.cfg.priceLists = D.cfg.priceLists.filter(x => x !== l); delete D.pricelists[l.id];
+  D.offers.offers = D.offers.offers.filter(o => o.list !== l.id);
+  touch(); drawTab(); toast('تم حذف المذخر (لن يختفي من التطبيق قبل النشر)');
 }
 function backup() {
   const blob = new Blob([JSON.stringify({ date: new Date().toISOString(), ...baseFiles() }, null, 2)], { type: 'application/json' });

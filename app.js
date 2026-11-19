@@ -88,6 +88,20 @@ function tierState(t) {
   };
 }
 
+// ===== العروض: عامة للجميع، أو خاصة بمذخر (تظهر عند اختياره فقط) =====
+let oi = 0;
+const curOffers = () => (offers.offers || []).filter(x => x.content && (!x.list || x.list === cur));
+function showOffer(reset) {
+  if (reset) oi = 0;
+  const o = curOffers(), b = $('#offer');
+  if (!o.length) { b.hidden = true; return; }
+  const x = o[oi % o.length]; oi++;
+  const wh = x.list ? lists().find(l => l.id === x.list) : null;
+  b.querySelector('.o-t').textContent = (x.title || 'عرض خاص') + (wh ? ' — مذخر ' + wh.name : '');
+  b.querySelector('.o-x').textContent = x.content.replace(/\s(\d{1,2})-(?=[^\d\s])/g, '\n$1- ').trim();
+  b.hidden = false;
+}
+
 // ===== مكوّنات الواجهة =====
 const thumb = p => 'thumbs/' + encodeURI(p.image || '');
 const full = p => 'images/' + encodeURI(p.image || '');
@@ -141,7 +155,7 @@ function drawSeg() {
   for (const l of L) s.append(el('button', { type: 'button', textContent: l.name, attrs: { role: 'radio', 'aria-checked': String(l.id === cur) },
     onclick: () => {
       if (cur === l.id) return;
-      cur = l.id; ls.set('list_v2', cur); drawSeg(); drawGrid(); renderCart();
+      cur = l.id; ls.set('list_v2', cur); drawSeg(); drawGrid(); renderCart(); showOffer(true);
       const { miss } = totals();
       toast(miss ? `تم التحويل إلى ${l.name} — ${miss} صنف غير متوفر لديه` : `تم التحويل إلى مذخر ${l.name}`);
     } }));
@@ -283,7 +297,7 @@ function renderReorder() {
   if (b.hidden) return;
   b.textContent = `↻ إعادة آخر طلب (${valid.length} صنف)`;
   b.onclick = () => {
-    if (last.list && lists().some(l => l.id === last.list) && last.list !== cur) { cur = last.list; ls.set('list_v2', cur); drawSeg(); drawGrid(); }
+    if (last.list && lists().some(l => l.id === last.list) && last.list !== cur) { cur = last.list; ls.set('list_v2', cur); drawSeg(); drawGrid(); showOffer(true); }
     setCart(Object.fromEntries(valid.map(id => [id, last.items[id]])));
     toast('تمت إعادة الطلب السابق — راجع الأسعار');
   };
@@ -367,17 +381,10 @@ async function init() {
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLayer(); });
 
   load('offers.json').then(d => {   // العروض اختيارية
-    offers = d; renderCart();
-    const o = (d.offers || []).filter(x => x.content); if (!o.length) return;
-    const b = $('#offer'); let i = 0;
-    const show = () => {
-      const x = o[i]; i = (i + 1) % o.length;
-      b.querySelector('.o-t').textContent = x.title || 'عرض خاص';
-      b.querySelector('.o-x').textContent = x.content.replace(/\s(\d{1,2})-(?=[^\d\s])/g, '\n$1- ').trim();
-      b.hidden = false;
-    };
+    offers = d; renderCart(); showOffer(true);
+    const b = $('#offer');
     b.onclick = () => b.setAttribute('aria-expanded', String(b.getAttribute('aria-expanded') !== 'true'));
-    show(); if (o.length > 1) setInterval(() => { if (b.getAttribute('aria-expanded') !== 'true') show(); }, 6000);
+    setInterval(() => { if (curOffers().length > 1 && b.getAttribute('aria-expanded') !== 'true') showOffer(); }, 6000);
   }).catch(() => {});
 }
 init();
