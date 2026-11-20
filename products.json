@@ -46,7 +46,7 @@
     "type": "tab",
     "price": 190,
     "image": "STELABIDZ.jpg",
-    "disabled": false
+    "disabled": true
   },
   {
     "name": "SPASMOBAN باكيت",
