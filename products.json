@@ -32,7 +32,7 @@
     "type": "tab",
     "price": 520,
     "image": "TRIMETHOPRIM.jpg",
-    "disabled": false
+    "disabled": true
   },
   {
     "name": "PRESILON-D 5mg",
@@ -606,6 +606,27 @@
     "type": "drop",
     "price": 950,
     "image": "Panadolz_infant.jpg",
+    "disabled": false
+  },
+  {
+    "name": "betnozum N",
+    "type": "cream",
+    "price": 780,
+    "image": "",
+    "disabled": false
+  },
+  {
+    "name": "nystatin",
+    "type": "susp",
+    "price": 1500,
+    "image": "item-mwpempwu.jpg",
+    "disabled": false
+  },
+  {
+    "name": "zinc oil 25g",
+    "type": "ointment",
+    "price": 1150,
+    "image": "",
     "disabled": false
   }
 ]
