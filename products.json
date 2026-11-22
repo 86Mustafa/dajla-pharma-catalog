@@ -1,52 +1,52 @@
 [
   {
-    "name": "ACTIVE-DIJ 100ml",
+    "name": "ACTIVE-DIJ 100ml ",
     "type": "syrup",
     "price": 1100,
     "image": "Active-d.jpg",
     "disabled": false
   },
   {
-    "name": "PARASTOL-D 500mg",
+    "name": "PARASTOL-D 500mg ",
     "type": "tab",
     "price": 225,
     "image": "PARASTOL.jpg",
     "disabled": false
   },
   {
-    "name": "LIEBRAX-D",
+    "name": "LIEBRAX-D ",
     "type": "tab",
     "price": 550,
     "image": "LIEBRAX.jpg",
     "disabled": false
   },
   {
-    "name": "DITRAZOLE – 500",
+    "name": "DITRAZOLE – 500 ",
     "type": "tab",
     "price": 415,
     "image": "DITRAZOLE.jpg",
     "disabled": false
   },
   {
-    "name": "TRIMETHOPRIM",
+    "name": "TRIMETHOPRIM ",
     "type": "tab",
     "price": 520,
     "image": "TRIMETHOPRIM.jpg",
-    "disabled": true
+    "disabled": false
   },
   {
-    "name": "PRESILON-D 5mg",
+    "name": "PRESILON-D 5mg ",
     "type": "tab",
     "price": 265,
     "image": "PRESILON.jpg",
     "disabled": false
   },
   {
-    "name": "DR- STELABIDZ",
+    "name": "DR- STELABIDZ ",
     "type": "tab",
     "price": 190,
     "image": "STELABIDZ.jpg",
-    "disabled": true
+    "disabled": false
   },
   {
     "name": "SPASMOBAN باكيت",
@@ -58,7 +58,7 @@
   {
     "name": "ALDOMETZONE 250mg 30tab",
     "type": "tab",
-    "price": 3950,
+    "price": 3350,
     "image": "ALDOMETZONE.jpg",
     "disabled": false
   },
@@ -77,7 +77,7 @@
     "disabled": false
   },
   {
-    "name": "ALARMEEN -D 25mg",
+    "name": "ALARMEEN -D 25mg ",
     "type": "tab",
     "price": 125,
     "image": "ALARMEEN.jpg",
@@ -91,7 +91,7 @@
     "disabled": false
   },
   {
-    "name": "Dixsoon",
+    "name": "Dixsoon ",
     "type": "tab",
     "price": 95,
     "image": "Dixsoon.jpg",
@@ -105,28 +105,28 @@
     "disabled": false
   },
   {
-    "name": "Diazepam BOX 100 2mg",
+    "name": "Diazepam BOX 100 2mg ",
     "type": "tab",
     "price": 3950,
     "image": "Diazepambox.jpg",
     "disabled": false
   },
   {
-    "name": "Diazepam 2mg",
+    "name": "Diazepam 2mg ",
     "type": "tab",
     "price": 300,
     "image": "Diazepam.jpg",
     "disabled": false
   },
   {
-    "name": "Digesic",
+    "name": "Digesic ",
     "type": "tab",
     "price": 350,
     "image": "Digesic.jpg",
     "disabled": false
   },
   {
-    "name": "Asprin -D 100mg",
+    "name": "Asprin -D 100mg ",
     "type": "tab",
     "price": 100,
     "image": "Asprin1.jpg",
@@ -140,21 +140,21 @@
     "disabled": false
   },
   {
-    "name": "Dr-interstopz 2mg",
+    "name": "Dr-interstopz 2mg ",
     "type": "tab",
     "price": 240,
     "image": "interstopz.jpg",
     "disabled": false
   },
   {
-    "name": "Algesec",
+    "name": "Algesec ",
     "type": "tab",
     "price": 695,
     "image": "Algesec.jpg",
     "disabled": false
   },
   {
-    "name": "Lebroxid 5mg",
+    "name": "Lebroxid 5mg ",
     "type": "tab",
     "price": 316,
     "image": "Libroxen.jpg",
@@ -175,14 +175,14 @@
     "disabled": false
   },
   {
-    "name": "Betnozum/ (بدون)",
+    "name": "Betnozum/ (بدون) ",
     "type": "ointment",
     "price": 535,
     "image": "Betnozum2.jpg",
     "disabled": false
   },
   {
-    "name": "Betnozum/ (باكيت)",
+    "name": "Betnozum/ (باكيت) ",
     "type": "ointment",
     "price": 600,
     "image": "Betnozum3.jpg",
@@ -371,7 +371,7 @@
     "disabled": false
   },
   {
-    "name": "Betnozum-gen 15g",
+    "name": "Betnozum-gen 15g   ",
     "type": "cream",
     "price": 535,
     "image": "Betnozum1g.jpg",
@@ -574,7 +574,7 @@
     "disabled": false
   },
   {
-    "name": "Vomodij /   (باكيت)",
+    "name": " Vomodij /   (باكيت)",
     "type": "syrup",
     "price": 2215,
     "image": "Vomodij.jpg",
@@ -606,27 +606,6 @@
     "type": "drop",
     "price": 950,
     "image": "Panadolz_infant.jpg",
-    "disabled": false
-  },
-  {
-    "name": "betnozum N",
-    "type": "cream",
-    "price": 780,
-    "image": "",
-    "disabled": false
-  },
-  {
-    "name": "nystatin",
-    "type": "susp",
-    "price": 1500,
-    "image": "item-mwpempwu.jpg",
-    "disabled": false
-  },
-  {
-    "name": "zinc oil 25g",
-    "type": "ointment",
-    "price": 1150,
-    "image": "",
     "disabled": false
   }
 ]

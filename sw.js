@@ -1,6 +1,6 @@
 // Service Worker — يجعل الكتالوج يعمل بدون إنترنت ويبقي الأسعار محدّثة
-const V = 'dajla-v2';
-const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest', 'config.json', 'offers.json',
+const V = 'dajla-v3';
+const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'orders-api.js', 'manifest.webmanifest', 'config.json', 'offers.json',
   'pricelists.json', 'products.json', 'icons/logo.png', 'icons/icon-192.png', 'fonts/cairo-arabic.woff2', 'fonts/cairo-latin.woff2'];
 
 self.addEventListener('install', e => {

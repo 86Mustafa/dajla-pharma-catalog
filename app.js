@@ -280,12 +280,15 @@ function sendOrder() {
     return `${i + 1}. *${p.name}*\n   ${qn} × ${fmt(priceOf(p))} = ${money(priceOf(p) * qn)}`;
   }).join('\n');
   const customer = cfg.customerFields.map(d => v[d.id] && `${d.label}: ${v[d.id]}`).filter(Boolean).join('\n');
-  const m = { brand: cfg.brand.name, date: new Date().toLocaleString('ar-IQ'), orderId: Date.now().toString().slice(-6),
+  const no = Date.now().toString().slice(-6);
+  const m = { brand: cfg.brand.name, date: new Date().toLocaleString('ar-IQ'), orderId: no,
     warehouse: lists().length > 1 ? '🏬 المذخر: ' + curList().name + '\n' : '', items, total: money(t), customer };
   const msg = cfg.messageTemplate.replace(/\{(\w+)\}/g, (_, k) => m[k] ?? '');
+  if (!digits(curList().whatsapp || cfg.whatsapp)) return alert('لم يُضبط رقم واتساب استلام الطلبات بعد. اضبطه من لوحة المندوب ← الإعدادات.');
   const url = `https://wa.me/${digits(curList().whatsapp || cfg.whatsapp)}?text=${encodeURIComponent(msg)}`;
+  if (OAPI.on) storeOrder(no, v, ids, t);
   ls.set('last_v2', { list: cur, items: Object.fromEntries(ids.map(k => [k, cart[k]])), at: Date.now() });
-  $('#sent').hidden = false; $('#sent').scrollIntoView({ block: 'center', behavior: 'smooth' });
+  $('#sent').hidden = false; $('#sentTrack').hidden = !OAPI.on; $('#sent').scrollIntoView({ block: 'center', behavior: 'smooth' });
   if (!window.open(url, '_blank')) location.href = url;
 }
 
@@ -330,6 +333,61 @@ function setupInstall() {
 
 // ===== التشغيل =====
 function skeleton() { $('#grid').replaceChildren(...Array.from({ length: 8 }, () => el('div', { className: 'sk' }))); }
+// ===== طلباتي: حفظ الطلب لدى المندوب ومتابعة حالته =====
+// الحفظ في قاعدة البيانات لا يعطّل واتساب أبداً: يبدأ بالخلفية ويُعاد تلقائياً إن فشل
+const MY = 'my_orders_v1', FINAL = ['delivered', 'cancelled'];
+const myOrders = () => ls.get(MY, []);
+function storeOrder(no, v, ids, total) {
+  const now = Date.now();
+  const o = { id: OAPI.newId(), no, localMs: now, cust: v, warehouse: { id: cur, name: curList().name || '' },
+    items: ids.map(k => { const p = byId(k); return { id: k, name: p.name, qty: cart[k], price: priceOf(p), prepared: null }; }),
+    total, status: 'new', repNote: '', holdReason: '', history: [{ s: 'new', at: now, note: '' }] };
+  const recs = myOrders(); recs.unshift({ id: o.id, o, synced: false, doc: null, seen: 'new' }); ls.set(MY, recs.slice(0, 40));
+  OAPI.createOrder(o, true).then(() => patchRec(o.id, r => { r.synced = true; })).catch(() => {});
+}
+function patchRec(id, fn) { const recs = myOrders(), r = recs.find(x => x.id === id); if (r) { fn(r); ls.set(MY, recs); } }
+let syncing = false;
+async function syncOrders() {
+  if (!OAPI.on || syncing) return; syncing = true;
+  try {
+    for (const r of myOrders().filter(x => !x.synced)) { try { await OAPI.createOrder(r.o); patchRec(r.id, x => { x.synced = true; }); } catch {} }
+    const act = myOrders().filter(r => r.synced && !(r.doc && FINAL.includes(r.doc.status)));
+    if (act.length) { const m = await OAPI.getOrders(act.map(r => r.id)); for (const r of act) if (m[r.id]) patchRec(r.id, x => { x.doc = m[r.id]; }); }
+  } catch {} finally { syncing = false; }
+  badge(); if (layer === 'orders') drawOrders();
+}
+function badge() {
+  const n = myOrders().filter(r => r.doc && r.doc.status !== r.seen).length, b = $('#ordBadge');
+  b.hidden = !n; b.textContent = n;
+}
+const when = ms => new Date(ms).toLocaleString('ar-IQ', { dateStyle: 'short', timeStyle: 'short' });
+function drawOrders() {
+  const recs = myOrders(), box = $('#ordList');
+  if (!recs.length) { box.replaceChildren(el('p', { className: 'ord-empty', textContent: 'لا توجد طلبات بعد. بعد إرسال أول طلب تظهر هنا حالته.' })); return; }
+  box.replaceChildren(...recs.map(r => {
+    const d = r.doc || r.o, S = OAPI.STATUS[d.status] || OAPI.STATUS.new, partial = d.items.some(i => i.prepared != null && i.prepared < i.qty);
+    return el('article', { className: 'ord' },
+      el('div', { className: 'ord-h' }, el('b', { textContent: '#' + (d.no || '') }), el('span', { className: 'ord-st', style: `background:${S.c}`, textContent: S.ic + ' ' + S.t }),
+        partial && ['ready', 'delivered'].includes(d.status) ? el('span', { className: 'ord-st', style: 'background:#b45309', textContent: 'جزئي' }) : null),
+      el('div', { className: 'ord-m', textContent: `${when(d.createdAt || d.localMs)} · ${d.warehouse && d.warehouse.name ? 'مذخر ' + d.warehouse.name + ' · ' : ''}${money(d.total)}` }),
+      d.status === 'hold' && d.holdReason ? el('p', { className: 'ord-note bad', textContent: 'سبب التعليق: ' + d.holdReason }) : null,
+      d.repNote ? el('p', { className: 'ord-note', textContent: 'ملاحظة المندوب: ' + d.repNote }) : null,
+      !r.synced ? el('p', { className: 'ord-note', textContent: 'يصل طلبك للمندوب عبر واتساب. لم تُسجَّل حالته بعد (تحتاج اتصالاً بالإنترنت).' }) : null,
+      el('details', {}, el('summary', { textContent: `الأصناف (${d.items.length}) والتفاصيل` }),
+        el('ul', { className: 'ord-it' }, ...d.items.map(i => el('li', {}, el('span', { textContent: `${i.name}` }),
+          el('b', { textContent: ' × ' + i.qty }), i.prepared != null && i.prepared < i.qty ? el('em', { textContent: ` (جُهّز ${i.prepared})` }) : null))),
+        el('ol', { className: 'ord-tl' }, ...(d.history || []).map(h => el('li', {}, (OAPI.STATUS[h.s] || {}).t || h.s, el('small', { textContent: ' · ' + when(h.at) + (h.note ? ' — ' + h.note : '') }))))));
+  }));
+  recs.forEach(r => { if (r.doc) patchRec(r.id, x => { x.seen = x.doc.status; }); }); badge();
+}
+function initOrders() {
+  const b = $('#myOrdersBtn'); b.hidden = false;
+  b.onclick = () => { openLayer('orders'); drawOrders(); syncOrders(); };
+  setInterval(() => { if (layer === 'orders' && !document.hidden) syncOrders(); }, 20000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) syncOrders(); });
+  badge(); syncOrders();
+}
+
 async function init() {
   document.querySelectorAll('[data-i]').forEach(n => n.innerHTML = IC[n.dataset.i] || '');
   skeleton(); setupInstall();
@@ -369,6 +427,7 @@ async function init() {
   if (!L.some(l => l.id === cur)) cur = L.length ? L[0].id : '';
   if (L.length > 1) { $('#listbar').hidden = false; drawSeg(); }
 
+  if (OAPI.init(cfg.orders)) initOrders();
   buildForm(); drawChips(); drawGrid(); renderCart(); renderReorder();
 
   $('#search').oninput = e => { q = e.target.value.trim(); drawGrid(); };

@@ -6,7 +6,7 @@
    ===================================================================== */
 const API = 'https://api.github.com';
 const FILES = ['config.json', 'products.json', 'pricelists.json', 'offers.json'];
-const DEFAULT_REPO = '86Mustafa/dajla-pharma-catalog';
+const DEFAULT_REPO = (() => { const m = location.hostname.match(/^([\w-]+)\.github\.io$/), p = location.pathname.split('/')[1]; return m && p ? m[1] + '/' + p : ''; })();
 const IDLE_MS = 10 * 60 * 1000;
 
 // ---------- أدوات ----------
@@ -57,7 +57,8 @@ async function unseal(pw, box) {
 }
 
 // ---------- GitHub ----------
-let token = null, RP = DEFAULT_REPO, BR = 'main';
+let token = null, RP = DEFAULT_REPO, BR = 'main', fbCred = null;
+const PERM_MSG = 'مفتاح GitHub لا يملك صلاحية الكتابة. المطلوب: Contents ← Read and write';
 async function gh(path, method = 'GET', body) {
   let r;
   try {
@@ -65,10 +66,44 @@ async function gh(path, method = 'GET', body) {
       headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', ...(body ? { 'Content-Type': 'application/json' } : {}) } });
   } catch { throw Object.assign(new Error('تعذر الاتصال بـ GitHub — تأكد من الإنترنت'), { net: true }); }
   if (!r.ok) {
-    const m = { 401: 'المفتاح غير صالح أو منتهي الصلاحية', 403: 'المفتاح لا يملك صلاحية كافية (يجب Contents: Read and write)', 404: 'المستودع غير موجود أو المفتاح لا يصل إليه', 409: 'تعارض في النشر', 422: 'تعذر النشر (قد يكون الفرع تغيّر)' }[r.status] || ('خطأ من GitHub: ' + r.status);
-    throw Object.assign(new Error(m), { status: r.status });
+    let detail = ''; try { detail = (await r.json()).message || ''; } catch {}
+    if (r.status === 403 && r.headers.get('x-ratelimit-remaining') === '0') throw Object.assign(new Error('تجاوزت حد طلبات GitHub مؤقتاً — انتظر بضع دقائق ثم حاول'), { status: 403 });
+    if ((r.status === 403 || r.status === 404) && method !== 'GET') throw Object.assign(new Error(PERM_MSG), { status: r.status, perm: true, detail });
+    const m = { 401: 'المفتاح غير صالح أو منتهي الصلاحية', 403: 'المفتاح لا يملك صلاحية القراءة على هذا المستودع', 404: 'المستودع غير موجود أو المفتاح لا يصل إليه', 409: 'تعارض في النشر', 422: 'تعذر النشر (قد يكون الفرع تغيّر أو محميّ)' }[r.status] || ('خطأ من GitHub: ' + r.status);
+    throw Object.assign(new Error(m + (detail && r.status >= 422 ? ` (${detail})` : '')), { status: r.status, detail });
   }
   return r.status === 204 ? null : r.json();
+}
+
+// فحص حقيقي لصلاحية الكتابة: إنشاء blob صغير غير مرتبط بأي ملف (لا يغيّر شيئاً في الموقع)
+async function checkWrite() { await gh(`/repos/${RP}/git/blobs`, 'POST', { content: 'write-check', encoding: 'utf-8' }); }
+function permBox() {
+  modal('المفتاح لا يملك صلاحية الكتابة', [
+    el('p', { style: 'font-weight:700;margin-bottom:8px', textContent: 'يستطيع المفتاح قراءة المستودع لكنه لا يستطيع حفظ التعديلات. هذا يحدث عندما تكون صلاحية Contents «Read-only» أو غير مفعّلة.' }),
+    el('p', { style: 'font-weight:800;margin-bottom:4px', textContent: 'الحل (دقيقة واحدة):' }),
+    el('ol', { className: 'steps' },
+      el('li', {}, 'افتح GitHub ← ', el('b', { textContent: 'Settings ← Developer settings ← Personal access tokens ← Fine-grained tokens' })),
+      el('li', {}, 'اضغط اسم مفتاحك ثم ', el('b', { textContent: 'Edit' })),
+      el('li', {}, 'تأكد أن ', el('b', { textContent: 'Repository access' }), ' يشمل مستودع الكتالوج'),
+      el('li', {}, el('b', { textContent: 'Repository permissions ← Contents ← Read and write' })),
+      el('li', {}, 'اضغط ', el('b', { textContent: 'Update' }), ' (التعديل يسري على نفس المفتاح فوراً)'),
+      el('li', {}, 'عُد هنا وأعد محاولة النشر')),
+    el('p', { style: 'color:var(--muted);font-size:13px;margin-top:10px', textContent: 'إن كان المستودع تابعاً لمنظمة (Organization) فقد يحتاج المفتاح موافقة مالك المنظمة.' })],
+    close => [el('button', { type: 'button', className: 'btn ghost', textContent: 'تغيير المفتاح', onclick: () => { close(); changeToken(); } }),
+      el('button', { type: 'button', className: 'btn', textContent: 'حسناً', onclick: close })]);
+}
+function changeToken() {
+  const f = {}; const mk = (id, l, ph) => el('div', { className: 'fld' }, el('label', { textContent: l, htmlFor: id }), (f[id] = el('input', { id, type: 'password', autocomplete: 'off', placeholder: ph || '', className: id === 'ntk' ? 'ltr' : '' })));
+  modal('تغيير مفتاح GitHub', [mk('ntk', 'المفتاح الجديد', 'github_pat_…'), mk('ntp', 'كلمة مرور اللوحة (للتأكيد)')], close => [
+    el('button', { type: 'button', className: 'btn ghost', textContent: 'إلغاء', onclick: close }),
+    el('button', { type: 'button', className: 'btn', textContent: 'تحقق وحفظ', onclick: async function () {
+      const nt = f.ntk.value.trim(), s = ls.get('adm_box');
+      if (nt.length < 20) return toast('ألصق المفتاح كاملاً');
+      try { await unseal(f.ntp.value, s.box); } catch { return toast('كلمة المرور غير صحيحة'); }
+      const old = token; token = nt; this.disabled = true; this.textContent = 'جارٍ التحقق…';
+      try { await gh(`/repos/${RP}`); await checkWrite(); s.box = await seal(f.ntp.value, { token: nt, fb: fbCred }); ls.set('adm_box', s); close(); toast('تم حفظ المفتاح الجديد ✅'); }
+      catch (e) { token = old; this.disabled = false; this.textContent = 'تحقق وحفظ'; toast(e.message); }
+    } })]);
 }
 
 // ---------- الحالة ----------
@@ -135,11 +170,13 @@ const fmtPhone = n => { n = String(n || ''); return n.startsWith('964') ? '0' + 
 function changes() {
   const out = [], bd = base.data;
   if (D.cfg.whatsapp !== bd.cfg.whatsapp) out.push(`📱 رقم واتساب الطلبات: من \u2066${fmtPhone(bd.cfg.whatsapp)}\u2069 إلى \u2066${fmtPhone(D.cfg.whatsapp)}\u2069`);
-  const rest = c => { const x = clone(c); delete x.whatsapp; delete x.priceLists; return JSON.stringify(x); };
+  const rest = c => { const x = clone(c); delete x.whatsapp; delete x.priceLists; delete x.orders; return JSON.stringify(x); };
   const bl = bd.cfg.priceLists || [], dl = D.cfg.priceLists || [];
   dl.filter(l => !bl.some(b => b.id === l.id)).forEach(l => out.push(`🏬 إضافة مذخر جديد «${l.name}»`));
   bl.filter(b => !dl.some(l => l.id === b.id)).forEach(b => out.push(`🗑 حذف مذخر «${b.name}»`));
   dl.forEach(l => { const b = bl.find(x => x.id === l.id); if (b && (b.name !== l.name || !!b.strict !== !!l.strict)) out.push(`🏬 تعديل مذخر «${b.name !== l.name ? b.name + ' ← ' + l.name : l.name}»`); });
+  const oc = x => JSON.stringify({ p: (x || {}).projectId || '', k: (x || {}).apiKey || '' });
+  if (oc(D.cfg.orders) !== oc(bd.cfg.orders)) out.push('🧾 تعديل إعدادات ربط نظام الطلبات');
   if (rest(D.cfg) !== rest(bd.cfg)) out.push('⚙️ تعديل إعدادات الواجهة (الاسم/الشعار/الأنواع)');
   const added = [], edited = [], priced = [], gone = [];
   const seen = new Set();
@@ -200,8 +237,8 @@ function renderSetup() {
     token = tk; RP = repo;
     try {
       const r = await gh(`/repos/${RP}`);
-      if (!r.permissions || !r.permissions.push) throw new Error('المفتاح لا يملك صلاحية الكتابة (Contents: Read and write)');
       BR = r.default_branch || 'main';
+      await checkWrite();   // يتأكد فعلياً أن المفتاح يستطيع الكتابة
       ls.set('adm_box', { box: await seal(pw, { token: tk }), repo: RP, branch: BR }); ls.del('adm_fail');
       await enter();
     } catch (e) { token = null; go.disabled = false; go.textContent = 'حفظ والدخول'; showErr(e.message); }
@@ -213,7 +250,7 @@ function renderSetup() {
       el('h3', { className: 'h2', textContent: 'أولاً: أنشئ مفتاح GitHub (دقيقتان)' }),
       el('ol', { className: 'steps' },
         el('li', {}, 'افتح GitHub وسجّل الدخول، ثم: ', el('b', { textContent: 'Settings ← Developer settings ← Personal access tokens ← Fine-grained tokens' })),
-        el('li', {}, 'اضغط ', el('b', { textContent: 'Generate new token' }), ' وسمّه مثلاً ', el('code', { textContent: 'dajla-admin' })),
+        el('li', {}, 'اضغط ', el('b', { textContent: 'Generate new token' }), ' وسمّه مثلاً ', el('code', { textContent: 'catalog-admin' })),
         el('li', {}, 'Expiration: اختر سنة. ', el('b', { textContent: 'Repository access ← Only select repositories' }), ' واختر مستودع الكتالوج فقط'),
         el('li', {}, el('b', { textContent: 'Permissions ← Repository permissions ← Contents ← Read and write' })),
         el('li', {}, 'اضغط Generate وانسخ المفتاح (يبدأ بـ ', el('code', { textContent: 'github_pat_' }), ') والصقه أدناه'))),
@@ -236,7 +273,7 @@ function renderLogin(msg) {
     go.disabled = true; go.textContent = 'جارٍ الفتح…';
     const s = ls.get('adm_box');
     try {
-      token = (await unseal(pw.value, s.box)).token; RP = s.repo; BR = s.branch || 'main'; ls.del('adm_fail');
+      { const o = await unseal(pw.value, s.box); token = o.token; fbCred = o.fb || null; } RP = s.repo; BR = s.branch || 'main'; ls.del('adm_fail');
       await enter();
     } catch (e) {
       token = null; go.disabled = false; go.textContent = 'دخول';
@@ -258,10 +295,11 @@ async function enter() {
   try { await loadRepo(); }
   catch (e) { token = null; renderLogin(e.message); return; }
   tab = 'items'; renderApp(); armIdle();
+  checkWrite().catch(e => { if (e.perm) setTimeout(permBox, 300); });
   if (D._restored) { delete D._restored; toast('تم استرجاع مسودتك غير المنشورة'); }
 }
 function lock(msg) {
-  token = null; clearTimeout(idleT); persist && base && persist();
+  token = null; fbCred = null; clearTimeout(idleT); persist && base && persist(); if (typeof OrdersUI !== 'undefined') OrdersUI.stop();
   document.body.classList.remove('lock'); renderLogin(msg);
 }
 function armIdle() {
@@ -270,7 +308,7 @@ function armIdle() {
 }
 
 // ---------- هيكل اللوحة ----------
-const TABS = [['items', 'الأصناف'], ['prices', 'الأسعار'], ['offers', 'العروض'], ['settings', 'الإعدادات']];
+const TABS = [['items', 'الأصناف'], ['prices', 'الأسعار'], ['offers', 'العروض'], ['orders', 'الطلبات'], ['returns', 'المرتجعات'], ['settings', 'الإعدادات']];
 function renderApp() {
   app().replaceChildren(
     el('header', { className: 'top' }, el('div', { className: 'top-in' }, el('h1', { textContent: 'لوحة المندوب' }),
@@ -283,8 +321,8 @@ function drawTabs() {
   $('#tabs').replaceChildren(...TABS.map(([k, t]) => el('button', { type: 'button', className: k === tab ? 'on' : '', textContent: t, onclick: () => { tab = k; drawTabs(); drawTab(); window.scrollTo(0, 0); } })));
 }
 function drawTab() {
-  const m = $('#main'); m.replaceChildren();
-  ({ items: tabItems, prices: tabPrices, offers: tabOffers, settings: tabSettings })[tab](m);
+  const m = $('#main'); m.replaceChildren(); OrdersUI.stop();
+  ({ items: tabItems, prices: tabPrices, offers: tabOffers, orders: OrdersUI.tabOrders, returns: OrdersUI.tabReturns, settings: tabSettings })[tab](m);
 }
 function drawPub() {   // يُحدَّث النص فقط (لا نعيد بناء الزر حتى لا تضيع نقرة المستخدم أثناء إغلاق حقل الإدخال)
   const p = $('#pub'); if (!p) return;
@@ -541,9 +579,11 @@ function tabSettings(m) {
     el('h3', { className: 'h2', textContent: 'أنواع الأصناف' }), el('div', { className: 'box' }, cats,
       el('div', { className: 'rowline' }, el('div', { className: 'fld' }, newCat), el('button', { type: 'button', className: 'btn sm', textContent: 'إضافة', onclick: () => {
         const v = newCat.value.trim(); if (!v) return; D.cfg.categories = D.cfg.categories || {}; D.cfg.categories['c' + Date.now().toString(36)] = v; newCat.value = ''; touch(); drawCats(); } }))),
+    el('h3', { className: 'h2', textContent: 'نظام الطلبات (Firebase)' }), OrdersUI.settingsBox(),
     el('h3', { className: 'h2', textContent: 'الأمان والنسخ الاحتياطي' }),
     el('div', { className: 'box row', style: 'flex-wrap:wrap' },
       el('button', { type: 'button', className: 'btn ghost sm', textContent: 'تغيير كلمة المرور', onclick: changePw }),
+      el('button', { type: 'button', className: 'btn ghost sm', textContent: 'تغيير مفتاح GitHub', onclick: changeToken }),
       el('button', { type: 'button', className: 'btn ghost sm', textContent: 'تنزيل نسخة احتياطية', onclick: backup }),
       el('button', { type: 'button', className: 'btn ghost sm', textContent: 'السجل والاسترجاع', onclick: openHistory })),
     el('div', { className: 'box', style: 'font-size:13px;color:var(--muted)' }, `المستودع: ${RP} (الفرع ${BR}) — آخر نسخة منشورة: ${base.commit.slice(0, 7)}`));
@@ -558,7 +598,7 @@ async function removeWh(l) {
 }
 function backup() {
   const blob = new Blob([JSON.stringify({ date: new Date().toISOString(), ...baseFiles() }, null, 2)], { type: 'application/json' });
-  const a = el('a', { href: URL.createObjectURL(blob), download: `dajla-backup-${new Date().toISOString().slice(0, 10)}.json` }); document.body.append(a); a.click(); a.remove();
+  const a = el('a', { href: URL.createObjectURL(blob), download: `catalog-backup-${new Date().toISOString().slice(0, 10)}.json` }); document.body.append(a); a.click(); a.remove();
 }
 function changePw() {
   const f = {}; const mk = (id, l) => el('div', { className: 'fld' }, el('label', { textContent: l, htmlFor: id }), (f[id] = el('input', { id, type: 'password', autocomplete: 'off' })));
@@ -567,7 +607,7 @@ function changePw() {
     el('button', { type: 'button', className: 'btn', textContent: 'حفظ', onclick: async () => {
       const s = ls.get('adm_box'); try { await unseal(f.p0.value, s.box); } catch { return toast('كلمة المرور الحالية غير صحيحة'); }
       if (f.p1.value.length < 6) return toast('الجديدة 6 أحرف على الأقل'); if (f.p1.value !== f.p2.value) return toast('غير متطابقتين');
-      s.box = await seal(f.p1.value, { token }); ls.set('adm_box', s); close(); toast('تم تغيير كلمة المرور ✅'); } })]);
+      s.box = await seal(f.p1.value, { token, fb: fbCred }); ls.set('adm_box', s); close(); toast('تم تغيير كلمة المرور ✅'); } })]);
 }
 async function openHistory() {
   const body = el('div', {}, el('div', { className: 'spin' }, el('i')));
@@ -606,7 +646,7 @@ function openPublish() {
       if (await confirmBox('التراجع عن كل التعديلات غير المنشورة؟', 'تجاهل')) { close(); discard(); } } }),
     el('button', { type: 'button', className: 'btn', textContent: 'نشر الآن', disabled: !!errs.length, onclick: async function () {
       this.disabled = true; this.textContent = 'جارٍ النشر…';
-      try { await publish(ch); close(); done(); } catch (e) { this.disabled = false; this.textContent = 'نشر الآن'; toast(e.message); if (e.conflict) { close(); conflictBox(); } } } })]);
+      try { await publish(ch); close(); done(); } catch (e) { this.disabled = false; this.textContent = 'نشر الآن'; if (e.perm) { close(); permBox(); } else toast(e.message); if (e.conflict) { close(); conflictBox(); } } } })]);
 }
 function discard() {
   D = clone(base.data); D.products.forEach((p, i) => p._u = i); nextU = D.products.length; pending.clear(); delImgs.clear(); ls.del('adm_draft'); drawTab(); drawPub(); toast('تم تجاهل التعديلات');

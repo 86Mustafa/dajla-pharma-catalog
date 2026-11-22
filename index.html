@@ -25,6 +25,7 @@
       <h1 id="brand">دجلة للصناعات الدوائية</h1>
       <p id="tagline"></p>
     </div>
+    <button id="myOrdersBtn" class="pill" type="button" hidden>📋 طلباتي<b id="ordBadge" class="dot" hidden></b></button>
     <button id="installBtn" class="pill" type="button" hidden><span data-i="download"></span>تثبيت</button>
   </div>
   <div id="offline" class="offline" role="status" hidden>أنت غير متصل بالإنترنت — الأسعار من آخر تحديث محفوظ</div>
@@ -91,6 +92,7 @@
       <div id="sent" class="sent" hidden>
         <b>تم تجهيز طلبك في واتساب 📲</b>
         <p>هل ضغطت «إرسال» داخل واتساب؟</p>
+        <p id="sentTrack" class="sent-track" hidden>تابع حالة طلبك من زر <b>«📋 طلباتي»</b> أعلى الصفحة.</p>
         <div class="row">
           <button type="button" id="sentYes" class="btn">نعم، تفريغ السلة</button>
           <button type="button" id="sentNo" class="btn ghost">لا، أبقِ السلة</button>
@@ -102,6 +104,19 @@
       <div class="sum"><span>الإجمالي</span><b id="total"></b></div>
       <button id="send" class="cta wa" type="button"><span data-i="wa"></span>إرسال الطلب عبر واتساب</button>
     </footer>
+  </section>
+</div>
+
+<!-- طلباتي: متابعة حالة الطلبات -->
+<div id="orders" class="layer" aria-hidden="true">
+  <div class="backdrop" data-close></div>
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="ordT">
+    <div class="grab"></div>
+    <header class="sh-h">
+      <div><h2 id="ordT">طلباتي</h2><p id="ordSub">تتحدّث الحالة تلقائياً</p></div>
+      <button class="icon-btn" type="button" data-close aria-label="إغلاق"><span data-i="close"></span></button>
+    </header>
+    <div class="sh-b"><div id="ordList" class="ord-list"></div></div>
   </section>
 </div>
 
@@ -121,6 +136,7 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+<script src="orders-api.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

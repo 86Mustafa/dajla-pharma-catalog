@@ -217,3 +217,23 @@ form{display:flex;flex-direction:column;gap:10px}
 
 @media (min-width:700px){.grid{grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:16px}.hero h1{font-size:22px}}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* ===== طلباتي ===== */
+.pill{position:relative}
+.dot{position:absolute;top:-5px;inset-inline-start:-5px;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;display:grid;place-items:center;padding:0 4px;font-weight:800}
+.sent-track{margin-top:6px;font-size:13px}
+.ord-list{display:grid;gap:12px;padding-top:6px}
+.ord-empty{text-align:center;color:var(--muted);padding:30px 10px}
+.ord{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow)}
+.ord-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ord-h b{font-size:16px}
+.ord-st{color:#fff;font-size:12.5px;font-weight:800;padding:3px 10px;border-radius:999px}
+.ord-m{font-size:12.5px;color:var(--muted);margin-top:4px}
+.ord-note{margin-top:8px;font-size:13px;background:var(--brand-l);border-radius:10px;padding:7px 10px;line-height:1.6}
+.ord-note.bad{background:#fdecec;color:#a02020}
+.ord details{margin-top:8px;font-size:13.5px}
+.ord summary{cursor:pointer;color:var(--brand-d);font-weight:700}
+.ord-it{list-style:none;padding:8px 0 0;display:grid;gap:4px}
+.ord-it em{color:#b45309;font-style:normal;font-weight:700}
+.ord-tl{padding:8px 18px 0;color:var(--ink);font-size:13px;line-height:1.9}
+.ord-tl small{color:var(--muted)}
