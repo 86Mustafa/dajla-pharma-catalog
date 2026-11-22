@@ -221,7 +221,8 @@ const OrdersUI = (() => {
       f('fb_pid', 'معرّف المشروع (Project ID)', c.projectId, e => set('projectId', e.target.value.trim()), 'text', 'my-catalog-12345'),
       f('fb_key', 'مفتاح الويب (Web API Key)', c.apiKey, e => set('apiKey', e.target.value.trim()), 'text', 'AIza…'),
       el('p', { style: 'font-size:12.5px;color:var(--muted);margin:-4px 0 12px', textContent: 'هذان يُنشران مع التطبيق (آمنان للنشر العام). بعد إدخالهما اضغط «مراجعة ونشر» لتُفعَّل الطلبات عند الصيادلة.' }),
-      em, pw, st,
+      em, pw, el('label', { style: 'display:flex;gap:8px;align-items:center;font-size:13px;margin:-4px 0 10px' },
+        el('input', { type: 'checkbox', style: 'width:18px;height:18px', onchange: e => { $('#fb_pw').type = e.target.checked ? 'text' : 'password'; } }), 'إظهار كلمة المرور للتأكد منها'), st,
       el('div', { className: 'row', style: 'flex-wrap:wrap;gap:8px' },
         el('button', { type: 'button', className: 'btn sm', textContent: 'حفظ بيانات الدخول', onclick: () => {
           const email = $('#fb_em').value.trim(), password = $('#fb_pw').value; if (!email || !password) return toast('أدخل البريد وكلمة المرور');
@@ -234,7 +235,10 @@ const OrdersUI = (() => {
         } }),
         el('button', { type: 'button', className: 'btn ghost sm', textContent: 'اختبار الاتصال', onclick: async function () {
           this.disabled = true; this.textContent = 'جارٍ الاختبار…';
-          try { OAPI.init(D.cfg.orders || {}); if (!fbCred) throw new Error('احفظ بيانات الدخول أولاً'); await OAPI.login(fbCred.email, fbCred.password); await OAPI.ordersSince(Date.now() - 1000); toast('الاتصال ناجح ✅'); }
+          try { OAPI.init(D.cfg.orders || {});
+            const te = $('#fb_em').value.trim().toLowerCase(), tp = $('#fb_pw').value, typed = te && tp, cr = typed ? { email: te, password: tp } : fbCred;
+            if (!cr) throw new Error('اكتب البريد وكلمة المرور ثم اختبر');
+            try { await OAPI.login(cr.email, cr.password); } catch (e) { if (/غير صحيح/.test(e.message)) e.message += ` (جرّبتُ: ${cr.email} — طول كلمة المرور ${cr.password.length} — ${typed ? 'من الحقلين' : 'من المحفوظ'})`; throw e; } await OAPI.ordersSince(Date.now() - 1000); toast('الاتصال ناجح ✅'); }
           catch (e) { toast(e.message); } finally { this.disabled = false; this.textContent = 'اختبار الاتصال'; } } }),
         fbCred ? el('button', { type: 'button', className: 'btn ghost sm', textContent: 'نسيان بيانات الدخول', onclick: async () => { const p = prompt('كلمة مرور اللوحة للتأكيد'); if (p == null) return; const s = ls.get('adm_box');
           try { await unseal(p, s.box); } catch { return toast('كلمة مرور اللوحة غير صحيحة'); } fbCred = null; s.box = await seal(p, { token }); ls.set('adm_box', s); OAPI._tok = null; paint(); toast('تم الحذف'); } }) : null));
