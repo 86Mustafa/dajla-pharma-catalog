@@ -45,8 +45,7 @@
   "priceLists": [
     {
       "id": "ضرغام",
-      "name": "ضرغام",
-      "strict": true
+      "name": "ضرغام"
     },
     {
       "id": "الضامن",
