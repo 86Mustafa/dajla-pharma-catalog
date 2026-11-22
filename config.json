@@ -45,16 +45,13 @@
   "priceLists": [
     {
       "id": "ضرغام",
-      "name": "ضرغام"
+      "name": "ضرغام",
+      "strict": true
     },
     {
       "id": "الضامن",
       "name": "الضامن",
       "whatsapp": ""
     }
-  ],
-  "orders": {
-    "projectId": "dijla-orders",
-    "apiKey": "AIzaSyCWqdtObmFFAo-KEq_c2elO3dVC2oVbcY8"
-  }
+  ]
 }
