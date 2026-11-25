@@ -376,6 +376,14 @@ const OrdersUI = (() => {
     return pdfFromJpegs(jpgs);
   }
 
+  // اسم الملف: طلبية + اسم الصيدلية + عنوانها
+  function pdfName(d) {
+    const c = d.cust || {}, clean = t => String(t || '').replace(/[\\/:*?"<>|\u0000-\u001f]+/g, ' ').replace(/\s+/g, ' ').trim();
+    let n = ['طلبية', clean(c.name), clean(c.address)].filter(Boolean).join(' - ');
+    if (n.length > 100) n = n.slice(0, 100).trim();
+    return (n === 'طلبية' ? 'طلبية ' + d.no : n) + '.pdf';
+  }
+
   // كاتب PDF مصغّر (صورة JPEG لكل صفحة A4) — بدون أي مكتبة خارجية
   function pdfFromJpegs(jpgs) {
     const enc = new TextEncoder(), parts = [], offs = []; let len = 0;
@@ -401,7 +409,7 @@ const OrdersUI = (() => {
   async function sendToWarehouse(d, btn, onlyDownload) {
     const old = btn && btn.textContent; if (btn) { btn.disabled = true; btn.textContent = 'جارٍ إنشاء الملف…'; }
     try {
-      const blob = await makeOrderPdf(d), name = `order-${d.no}.pdf`, wh = (d.warehouse && d.warehouse.name) || '';
+      const blob = await makeOrderPdf(d), name = pdfName(d), wh = (d.warehouse && d.warehouse.name) || '';
       const file = new File([blob], name, { type: 'application/pdf' }), text = `طلب تجهيز #${d.no} — ${(d.cust || {}).name || ''}${wh ? ' — مذخر ' + wh : ''} — ${d.items.length} صنف`;
       if (!onlyDownload && navigator.canShare && navigator.canShare({ files: [file] })) {
         try { await navigator.share({ files: [file], text, title: 'طلب تجهيز' }); markSent(d.id); drawOrders(); toast('تمت المشاركة ✅'); return; }
