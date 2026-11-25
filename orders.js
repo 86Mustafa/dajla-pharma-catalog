@@ -309,7 +309,15 @@ const OrdersUI = (() => {
     await Promise.all(['700 30px Cairo', '500 26px Cairo', '800 40px Cairo'].map(f => document.fonts.load(f, 'أ A1').catch(() => {})));
     const logo = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = (D.cfg.brand && D.cfg.brand.logo) || 'icons/logo.png'; });
     const c = (d.cust || {}), wh = (d.warehouse && d.warehouse.name) || '', brand = (D.cfg.brand && D.cfg.brand.name) || '';
-    const cols = [['م', 70, 'c'], ['المادة', 430, 'r'], ['الكمية', 130, 'c'], ['السعر', 170, 'c'], ['المجموع', 200, 'c'], ['✓', 100, 'c']];
+    const cols = [['م', 56, 'c'], ['المادة', 344, 'r'], ['النوع', 110, 'c'], ['التغليف', 110, 'c'], ['الكمية', 110, 'c'], ['السعر', 130, 'c'], ['المجموع', 160, 'c'], ['✓', 80, 'c']];
+    const cats = D.cfg.categories || {};
+    const typeOf = it => {
+      let t = it.type;
+      if (!t) { const m = String(it.id || '').match(/_([a-z]+)(?:_\d+)?$/); if (m && cats[m[1]]) t = m[1]; }
+      if (!t) { const p = (D.products || []).find(x => x.name.trim() === it.name.trim()); if (p) t = p.type; }
+      return t ? (cats[t] || t) : '—';
+    };
+    const splitName = n => { n = String(n).trim(); const m = n.match(/[\s(]*(باكيت|بدون)[\s)]*$/); return m ? [n.slice(0, m.index).replace(/\s*\/\s*$/, '').replace(/[\s(]+$/, '').trim() || n, m[1]] : [n, '—']; };
     const num = n => Number(n || 0).toLocaleString('en-US');
     const RH = 58, items = d.items, pages = [];
     let idx = 0, pageNo = 0;
@@ -335,8 +343,8 @@ const OrdersUI = (() => {
     const row = (x, it, i, y) => {
       if (i % 2) { x.fillStyle = '#f3faf7'; x.fillRect(MX, y, W - 2 * MX, RH); }
       x.strokeStyle = '#d7e6df'; x.lineWidth = 1.5; x.strokeRect(MX, y, W - 2 * MX, RH);
-      const cells = [String(i + 1), it.name.trim(), String(it.qty), num(it.price), num(it.qty * it.price), '☐']; let cx = W - MX;
-      cols.forEach(([, w, a], k) => { T(x, cells[k], a === 'c' ? cx - w / 2 : cx - 14, y + RH / 2, { size: k === 2 ? 32 : 27, w: k === 2 ? 800 : 500, al: a === 'c' ? 'center' : 'right', maxW: a === 'c' ? w - 12 : w - 28 }); cx -= w; });
+      const [nm, pk] = splitName(it.name), cells = [String(i + 1), nm, typeOf(it), pk, String(it.qty), num(it.price), num(it.qty * it.price), '☐']; let cx = W - MX;
+      cols.forEach(([, w, a], k) => { T(x, cells[k], a === 'c' ? cx - w / 2 : cx - 14, y + RH / 2, { size: k === 4 ? 32 : 27, w: k === 4 ? 800 : 500, al: a === 'c' ? 'center' : 'right', maxW: a === 'c' ? w - 12 : w - 28 }); cx -= w; });
       return y + RH;
     };
     while (true) {
