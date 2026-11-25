@@ -150,3 +150,14 @@ main{max-width:900px;margin:0 auto;padding:4px 14px}
 .rl-2{display:grid;grid-template-columns:70px 1fr;gap:6px}.rl-2 select{grid-column:1/-1}
 .rl input,.rl select{height:42px;border-radius:11px;border:1.5px solid var(--line);background:var(--bg);padding:0 10px;font-size:15px;width:100%}
 .modal input[type=date]{width:100%;height:48px;border-radius:13px;border:1.5px solid var(--line);background:var(--card);padding:0 13px;font-size:16px}
+
+/* طباعة الكشوفات */
+#prn{display:none}
+@media print{
+  body.printing>*:not(#prn){display:none!important}
+  body.printing{background:#fff;color:#000;padding:0}
+  body.printing #prn{display:block!important;direction:rtl;font:14px/1.6 Cairo,sans-serif;padding:14mm}
+  #prn h1{font-size:22px;margin:0 0 4px}#prn p{margin:0 0 14px;color:#444}
+  #prn table{width:100%;border-collapse:collapse}#prn th,#prn td{border:1px solid #999;padding:6px 8px;text-align:right}
+  #prn th{background:#e6f5f0}#prn tfoot td{font-weight:800;background:#f3f3f3}
+}

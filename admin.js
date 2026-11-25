@@ -6,7 +6,7 @@
    ===================================================================== */
 const API = 'https://api.github.com';
 const FILES = ['config.json', 'products.json', 'pricelists.json', 'offers.json'];
-const DEFAULT_REPO = (() => { const m = location.hostname.match(/^([\w-]+)\.github\.io$/), p = location.pathname.split('/')[1]; return m && p ? m[1] + '/' + p : ''; })();
+const DEFAULT_REPO = '86Mustafa/dajla-pharma-catalog';
 const IDLE_MS = 10 * 60 * 1000;
 
 // ---------- أدوات ----------
@@ -250,7 +250,7 @@ function renderSetup() {
       el('h3', { className: 'h2', textContent: 'أولاً: أنشئ مفتاح GitHub (دقيقتان)' }),
       el('ol', { className: 'steps' },
         el('li', {}, 'افتح GitHub وسجّل الدخول، ثم: ', el('b', { textContent: 'Settings ← Developer settings ← Personal access tokens ← Fine-grained tokens' })),
-        el('li', {}, 'اضغط ', el('b', { textContent: 'Generate new token' }), ' وسمّه مثلاً ', el('code', { textContent: 'catalog-admin' })),
+        el('li', {}, 'اضغط ', el('b', { textContent: 'Generate new token' }), ' وسمّه مثلاً ', el('code', { textContent: 'dajla-admin' })),
         el('li', {}, 'Expiration: اختر سنة. ', el('b', { textContent: 'Repository access ← Only select repositories' }), ' واختر مستودع الكتالوج فقط'),
         el('li', {}, el('b', { textContent: 'Permissions ← Repository permissions ← Contents ← Read and write' })),
         el('li', {}, 'اضغط Generate وانسخ المفتاح (يبدأ بـ ', el('code', { textContent: 'github_pat_' }), ') والصقه أدناه'))),
@@ -308,7 +308,7 @@ function armIdle() {
 }
 
 // ---------- هيكل اللوحة ----------
-const TABS = [['items', 'الأصناف'], ['prices', 'الأسعار'], ['offers', 'العروض'], ['orders', 'الطلبات'], ['returns', 'المرتجعات'], ['settings', 'الإعدادات']];
+const TABS = [['items', 'الأصناف'], ['prices', 'الأسعار'], ['offers', 'العروض'], ['orders', 'الطلبات'], ['returns', 'المرتجعات'], ['statement', 'الكشوفات'], ['settings', 'الإعدادات']];
 function renderApp() {
   app().replaceChildren(
     el('header', { className: 'top' }, el('div', { className: 'top-in' }, el('h1', { textContent: 'لوحة المندوب' }),
@@ -322,7 +322,7 @@ function drawTabs() {
 }
 function drawTab() {
   const m = $('#main'); m.replaceChildren(); OrdersUI.stop();
-  ({ items: tabItems, prices: tabPrices, offers: tabOffers, orders: OrdersUI.tabOrders, returns: OrdersUI.tabReturns, settings: tabSettings })[tab](m);
+  ({ items: tabItems, prices: tabPrices, offers: tabOffers, orders: OrdersUI.tabOrders, returns: OrdersUI.tabReturns, statement: OrdersUI.tabStatement, settings: tabSettings })[tab](m);
 }
 function drawPub() {   // يُحدَّث النص فقط (لا نعيد بناء الزر حتى لا تضيع نقرة المستخدم أثناء إغلاق حقل الإدخال)
   const p = $('#pub'); if (!p) return;
@@ -580,6 +580,7 @@ function tabSettings(m) {
       el('div', { className: 'rowline' }, el('div', { className: 'fld' }, newCat), el('button', { type: 'button', className: 'btn sm', textContent: 'إضافة', onclick: () => {
         const v = newCat.value.trim(); if (!v) return; D.cfg.categories = D.cfg.categories || {}; D.cfg.categories['c' + Date.now().toString(36)] = v; newCat.value = ''; touch(); drawCats(); } }))),
     el('h3', { className: 'h2', textContent: 'نظام الطلبات (Firebase)' }), OrdersUI.settingsBox(),
+    el('h3', { className: 'h2', textContent: 'مجموعات واتساب للمذاخر' }), OrdersUI.groupsBox(),
     el('h3', { className: 'h2', textContent: 'الأمان والنسخ الاحتياطي' }),
     el('div', { className: 'box row', style: 'flex-wrap:wrap' },
       el('button', { type: 'button', className: 'btn ghost sm', textContent: 'تغيير كلمة المرور', onclick: changePw }),
@@ -598,7 +599,7 @@ async function removeWh(l) {
 }
 function backup() {
   const blob = new Blob([JSON.stringify({ date: new Date().toISOString(), ...baseFiles() }, null, 2)], { type: 'application/json' });
-  const a = el('a', { href: URL.createObjectURL(blob), download: `catalog-backup-${new Date().toISOString().slice(0, 10)}.json` }); document.body.append(a); a.click(); a.remove();
+  const a = el('a', { href: URL.createObjectURL(blob), download: `dajla-backup-${new Date().toISOString().slice(0, 10)}.json` }); document.body.append(a); a.click(); a.remove();
 }
 function changePw() {
   const f = {}; const mk = (id, l) => el('div', { className: 'fld' }, el('label', { textContent: l, htmlFor: id }), (f[id] = el('input', { id, type: 'password', autocomplete: 'off' })));

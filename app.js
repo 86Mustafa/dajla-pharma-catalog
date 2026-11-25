@@ -284,7 +284,6 @@ function sendOrder() {
   const m = { brand: cfg.brand.name, date: new Date().toLocaleString('ar-IQ'), orderId: no,
     warehouse: lists().length > 1 ? '🏬 المذخر: ' + curList().name + '\n' : '', items, total: money(t), customer };
   const msg = cfg.messageTemplate.replace(/\{(\w+)\}/g, (_, k) => m[k] ?? '');
-  if (!digits(curList().whatsapp || cfg.whatsapp)) return alert('لم يُضبط رقم واتساب استلام الطلبات بعد. اضبطه من لوحة المندوب ← الإعدادات.');
   const url = `https://wa.me/${digits(curList().whatsapp || cfg.whatsapp)}?text=${encodeURIComponent(msg)}`;
   if (OAPI.on) storeOrder(no, v, ids, t);
   ls.set('last_v2', { list: cur, items: Object.fromEntries(ids.map(k => [k, cart[k]])), at: Date.now() });
