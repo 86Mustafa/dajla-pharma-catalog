@@ -97,6 +97,7 @@ const OrdersUI = (() => {
     const d = O.docs[id]; if (!d) return;
     const c = d.cust || {}, S = ST()[d.status] || ST().new, w = JSON.parse(JSON.stringify(d.items));
     const note = el('textarea', { placeholder: 'ملاحظة تظهر للصيدلاني (اختياري)', value: d.repNote || '' });
+    const whNote = el('textarea', { placeholder: 'ملاحظات التجهيز للمذخر — تظهر أسفل ملف PDF (اختياري)', value: d.whNote || '', rows: 3 });
     const rows = w.map((it, i) => el('div', { className: 'oi' }, el('div', { className: 'oi-n' }, el('b', { textContent: it.name }), el('small', { textContent: `المطلوب ${it.qty} × ${fmt(it.price || 0)}` })),
       el('input', { type: 'number', min: 0, max: it.qty, inputMode: 'numeric', placeholder: String(it.qty), value: it.prepared == null ? '' : it.prepared, attrs: { 'aria-label': 'الكمية المجهّزة' },
         oninput: e => { const v = e.target.value; it.prepared = v === '' ? null : Math.max(0, Math.min(it.qty, Number(v))); } })));
@@ -107,7 +108,7 @@ const OrdersUI = (() => {
       this.disabled = true;
       try {
         const items = w.map(i => ({ ...i, prepared: ['ready', 'delivered'].includes(status) && i.prepared == null ? i.qty : i.prepared }));
-        const patch = { status, items, repNote: note.value.trim(), holdReason: status === 'hold' ? reason : '', history: [...(d.history || []), { s: status, at: Date.now(), note: reason }] };
+        const patch = { status, items, repNote: note.value.trim(), whNote: whNote.value.trim(), holdReason: status === 'hold' ? reason : '', history: [...(d.history || []), { s: status, at: Date.now(), note: reason }] };
         await ensure(); await OAPI.updateOrder(d.id, patch);
         O.docs[d.id] = { ...d, ...patch, updatedAt: Date.now() }; save(); drawOrders(); close(); toast('تم تحديث الحالة ✅');
         if (await confirmBox(`أصبحت حالة الطلب «${ST()[status].t}». هل تريد إبلاغ الصيدلاني عبر واتساب؟`, 'فتح واتساب', false)) openWa(O.docs[d.id]);
@@ -129,8 +130,9 @@ const OrdersUI = (() => {
       el('div', { className: 'acts' }, ...A.map(a => act(...a))),
       el('div', { className: 'acts' }, el('button', { type: 'button', className: 'btn ghost sm', textContent: '💬 إبلاغ الصيدلاني', onclick: () => openWa({ ...d, repNote: note.value.trim(), items: w }) }),
         el('button', { type: 'button', className: 'btn ghost sm', textContent: '↩ مرتجع لهذه الصيدلية', onclick: () => { close(); tab = 'returns'; drawTabs(); drawTab(); openReturn(null, { pharmacy: c.name, phone: c.phone, orderNo: d.no }); } })),
-      el('div', { className: 'acts' }, el('button', { type: 'button', className: 'btn sm', textContent: '📤 إرسال للمذخر (PDF)', onclick: function () { sendToWarehouse({ ...d, repNote: note.value.trim(), items: w.map(i => ({ ...i })) }, this); } }),
-        el('button', { type: 'button', className: 'btn ghost sm', textContent: '⬇ تنزيل PDF', onclick: function () { sendToWarehouse({ ...d, repNote: note.value.trim(), items: w.map(i => ({ ...i })) }, this, true); } })),
+      el('div', { className: 'fld', style: 'margin-top:12px' }, el('label', { textContent: '📝 ملاحظات التجهيز للمذخر' }), whNote),
+      el('div', { className: 'acts' }, el('button', { type: 'button', className: 'btn sm', textContent: '📤 إرسال للمذخر (PDF)', onclick: function () { sendToWarehouse({ ...d, whNote: whNote.value.trim(), items: w.map(i => ({ ...i })) }, this); } }),
+        el('button', { type: 'button', className: 'btn ghost sm', textContent: '⬇ تنزيل PDF', onclick: function () { sendToWarehouse({ ...d, whNote: whNote.value.trim(), items: w.map(i => ({ ...i })) }, this, true); } })),
       sentWh(d.id) ? el('p', { style: 'font-size:12.5px;color:var(--brand-d);margin-top:6px', textContent: '✅ أُرسل للمذخر ' + when(sentWh(d.id)) }) : null,
       el('div', { className: 'oi-head', style: 'margin-top:14px' }, el('b', { textContent: 'السجل' })),
       el('ol', { className: 'ord-tl' }, ...(d.history || []).map(h => el('li', {}, (ST()[h.s] || {}).t || h.s, el('small', { textContent: ' · ' + when(h.at) + (h.note ? ' — ' + h.note : '') })))));
@@ -320,6 +322,11 @@ const OrdersUI = (() => {
     const splitName = n => { n = String(n).trim(); const m = n.match(/[\s(]*(باكيت|بدون)[\s)]*$/); return m ? [n.slice(0, m.index).replace(/\s*\/\s*$/, '').replace(/[\s(]+$/, '').trim() || n, m[1]] : [n, '—']; };
     const num = n => Number(n || 0).toLocaleString('en-US');
     const RH = 58, items = d.items, pages = [];
+    const wrap = (txt, maxW, font) => { const m = document.createElement('canvas').getContext('2d'); m.font = font; const out = []; for (const para of String(txt).split(/\n/)) { let line = ''; for (const wd of para.split(/\s+/).filter(Boolean)) { const t = line ? line + ' ' + wd : wd; if (line && m.measureText(t).width > maxW) { out.push(line); line = wd; } else line = t; } out.push(line); } return out; };
+    const noteLines = [];
+    if (d.whNote) wrap(d.whNote, W - 2 * MX - 60, '500 27px Cairo, sans-serif').forEach(l => noteLines.push(l));
+    const pharmNote = (c.notes || '').trim(), pharmLines = pharmNote ? wrap(pharmNote, W - 2 * MX - 60, '500 27px Cairo, sans-serif') : [];
+    const NL = 40, noteH = (noteLines.length || pharmLines.length) ? 24 + 46 + (noteLines.length ? noteLines.length * NL + 10 : 0) + (pharmLines.length ? 40 + pharmLines.length * NL : 0) + 20 : 0;
     let idx = 0, pageNo = 0;
     const mk = () => { const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const x = cv.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, W, H); x.textBaseline = 'middle'; return [cv, x]; };
     const T = (x, s, px, py, { size = 28, w = 500, col = INK, al = 'right', maxW } = {}) => {
@@ -360,13 +367,17 @@ const OrdersUI = (() => {
       } else { head(x); y = 225; }
       y = tHead(x, y);
       const bottom = H - 130;
-      while (idx < items.length && y + RH <= bottom - (idx === items.length - 1 ? 190 : 0)) { y = row(x, items[idx], idx, y); idx++; }
+      while (idx < items.length && y + RH <= bottom - (idx === items.length - 1 ? 110 + noteH : 0)) { y = row(x, items[idx], idx, y); idx++; }
       if (idx >= items.length) {
         const tot = items.reduce((s, i) => s + i.qty * i.price, 0), q = items.reduce((s, i) => s + i.qty, 0);
         rr(x, MX, y + 14, W - 2 * MX, 70, 12, GL);
         T(x, `عدد الأصناف: ${items.length}   ·   مجموع الكميات: ${q}`, W - MX - 24, y + 49, { size: 27, w: 700 });
         T(x, 'المجموع: ' + num(tot) + ' د.ع', MX + 24, y + 49, { size: 30, w: 800, col: GD, al: 'left' });
-        if (d.repNote) { rr(x, MX, y + 100, W - 2 * MX, 70, 12, '#fff7ef', '#f2a36b'); T(x, 'ملاحظة: ' + d.repNote, W - MX - 24, y + 135, { size: 25, maxW: W - 2 * MX - 48 }); }
+        if (noteH) {
+          const by = y + 100; rr(x, MX, by, W - 2 * MX, noteH, 14, '#fff7ef', '#f2a36b'); let ty = by + 40;
+          if (noteLines.length) { T(x, 'ملاحظات التجهيز', W - MX - 30, ty, { size: 28, w: 800, col: '#b45309' }); ty += 46; noteLines.forEach(l => { T(x, l, W - MX - 30, ty, { size: 27 }); ty += NL; }); ty += 10; }
+          if (pharmLines.length) { T(x, 'ملاحظة الصيدلية', W - MX - 30, ty, { size: 26, w: 700, col: MUT }); ty += 40; pharmLines.forEach(l => { T(x, l, W - MX - 30, ty, { size: 26, col: MUT }); ty += NL; }); }
+        }
         break;
       }
     }
@@ -409,6 +420,8 @@ const OrdersUI = (() => {
   async function sendToWarehouse(d, btn, onlyDownload) {
     const old = btn && btn.textContent; if (btn) { btn.disabled = true; btn.textContent = 'جارٍ إنشاء الملف…'; }
     try {
+      const cur = O.docs[d.id];   // حفظ ملاحظات المذخر مع الطلب (لا يعطّل الإرسال إن فشل)
+      if (cur && (cur.whNote || '') !== (d.whNote || '')) OAPI.updateOrder(d.id, { whNote: d.whNote || '' }).then(() => { O.docs[d.id] = { ...cur, whNote: d.whNote || '' }; save(); }).catch(() => {});
       const blob = await makeOrderPdf(d), name = pdfName(d), wh = (d.warehouse && d.warehouse.name) || '';
       const file = new File([blob], name, { type: 'application/pdf' }), text = `طلب تجهيز #${d.no} — ${(d.cust || {}).name || ''}${wh ? ' — مذخر ' + wh : ''} — ${d.items.length} صنف`;
       if (!onlyDownload && navigator.canShare && navigator.canShare({ files: [file] })) {
