@@ -120,6 +120,9 @@
       return this._query({ from: [{ collectionId: 'returns' }], orderBy: [{ field: { fieldPath: 'createdMs' }, direction: 'DESCENDING' }], limit: 500 });
     },
     saveReturn(r) { return this._req(`/returns/${encodeURIComponent(r.id)}`, { method: 'PATCH', auth: true, body: { fields: encF(r) } }); },
+    listQuotas() { return this._query({ from: [{ collectionId: 'bonusQuotas' }], limit: 300 }); },
+    saveQuota(q) { return this._req(`/bonusQuotas/${encodeURIComponent(q.id)}`, { method: 'PATCH', auth: true, body: { fields: encF(q) } }); },
+    deleteQuota(id) { return this._req(`/bonusQuotas/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true }); },
     deleteReturn(id) { return this._req(`/returns/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true }); }
   };
 

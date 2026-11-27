@@ -8,7 +8,7 @@ const OrdersUI = (() => {
   const REASONS = ['قرب انتهاء الصلاحية', 'تالف / مكسور', 'خطأ في التجهيز', 'رفض الصيدلاني', 'أخرى'];
   const ST = () => OAPI.STATUS;
   let O = ls.get(CK, { pid: '', since: 0, docs: {} }), timer = null, busy = false, err = '';
-  let filter = 'active', q = '', ui = null, RET = null, retQ = '', retUi = null;
+  let filter = 'active', q = '', ui = null, RET = null, retQ = '', retUi = null, bUi = null;
   const save = () => ls.set(CK, O);
   const cur = () => (D.cfg.orders && D.cfg.orders.projectId) || '';
   const digits = s => String(s || '').replace(/\D/g, '');
@@ -16,7 +16,7 @@ const OrdersUI = (() => {
   const when = ms => new Date(ms).toLocaleString('ar-IQ', { dateStyle: 'short', timeStyle: 'short' });
   const ago = ms => { const m = Math.floor((Date.now() - ms) / 60000); if (m < 1) return 'الآن'; if (m < 60) return `منذ ${m} د`; const h = Math.floor(m / 60); return h < 24 ? `منذ ${h} س` : `منذ ${Math.floor(h / 24)} يوم`; };
   const late = d => ['new', 'preparing'].includes(d.status) && Date.now() - (d.createdAt || Date.now()) > 24 * 3600e3;
-  const stop = () => { clearInterval(timer); timer = null; ui = null; retUi = null; sUi = null; };
+  const stop = () => { clearInterval(timer); timer = null; ui = null; retUi = null; sUi = null; bUi = null; };
   const start = fn => { clearInterval(timer); timer = setInterval(() => { if (!document.hidden && token) fn(); }, 20000); };
 
   async function ensure() {
@@ -36,8 +36,11 @@ const OrdersUI = (() => {
       await ensure();
       if (O.pid !== cur()) O = { pid: cur(), since: 0, docs: {} };
       const from = O.since ? O.since - 1000 : Date.now() - 90 * 864e5;
+      try { await loadQuotas(); } catch {}
       const rows = await OAPI.ordersSince(from);
       for (const d of rows) { O.docs[d.id] = d; O.since = Math.max(O.since, d.updatedAt || 0); }
+      const mf = Math.min(...(QT || []).map(x => x.from || Infinity));   // مخصّص يبدأ قبل نافذة الـ90 يوماً: اجلب طلباته القديمة مرة واحدة
+      if (isFinite(mf) && mf < (O.floor || Date.now() - 90 * 864e5)) { for (const d of await OAPI.ordersSince(mf - 1)) O.docs[d.id] = d; O.floor = mf; }
       if (!O.since) O.since = Date.now() - 90 * 864e5;
       save(); err = '';
     } catch (e) { err = e; }
@@ -45,9 +48,9 @@ const OrdersUI = (() => {
   }
 
   function tabOrders(m) {
-    const U = ui = { sum: el('div', { className: 'oc-sum' }), chips: el('div', { className: 'chips' }), err: el('div'), list: el('div', { className: 'oc-list' }) };
+    const U = ui = { bn: el('div'), sum: el('div', { className: 'oc-sum' }), chips: el('div', { className: 'chips' }), err: el('div'), list: el('div', { className: 'oc-list' }) };
     const s = el('input', { type: 'search', placeholder: 'ابحث: رقم الطلب أو اسم الصيدلية أو هاتفها…', value: q, oninput: e => { q = e.target.value.trim(); drawOrders(); } });
-    m.append(U.sum, el('div', { className: 'fld' }, s), U.chips, U.err, U.list,
+    m.append(U.bn, U.sum, el('div', { className: 'fld' }, s), U.chips, U.err, U.list,
       el('div', { style: 'text-align:center;margin-top:10px' }, el('button', { type: 'button', className: 'btn ghost sm', textContent: '↻ تحديث الآن', onclick: refresh })));
     drawOrders(); refresh(); start(refresh);
   }
@@ -56,6 +59,7 @@ const OrdersUI = (() => {
     if (!ui || !ui.list.isConnected) return;
     const all = Object.values(O.docs).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)), cnt = {};
     for (const d of all) cnt[d.status] = (cnt[d.status] || 0) + 1;
+    ui.bn.replaceChildren(...bonusBanner());
     const nLate = all.filter(late).length, today0 = new Date().setHours(0, 0, 0, 0);
     const todayT = all.filter(d => (d.createdAt || 0) >= today0 && d.status !== 'cancelled').reduce((s, d) => s + (d.total || 0), 0);
     const tile = (k, n, label, color) => el('button', { type: 'button', className: 'tile' + (filter === k ? ' on' : ''), style: `--c:${color}`, onclick: () => { filter = k; drawOrders(); } }, el('b', { textContent: n }), el('span', { textContent: label }));
@@ -97,6 +101,37 @@ const OrdersUI = (() => {
     const d = O.docs[id]; if (!d) return;
     const c = d.cust || {}, S = ST()[d.status] || ST().new, w = JSON.parse(JSON.stringify(d.items));
     const note = el('textarea', { placeholder: 'ملاحظة تظهر للصيدلاني (اختياري)', value: d.repNote || '' });
+    const B = (d.bonus || []).map(b => ({ ...b })), bonusBox = el('div', { className: 'bn-box' });
+    const getBonus = () => B.filter(b => b.name && Number(b.qty) > 0).map(b => ({ name: b.name, qty: Number(b.qty), value: Number(b.value) || 0, qid: b.qid || '' }));
+    const whn = (d.warehouse && d.warehouse.name) || '';
+    const relevant = () => (QT || []).filter(x => (!x.warehouse || x.warehouse === whn) && inPeriod(x, d.createdAt || Date.now()));
+    const drawBonus = () => {
+      const rq = relevant(), me = id => B.filter(b => b.qid === id && b.name && Number(b.qty) > 0).reduce((t, b) => t + (qUnit(rq.find(x => x.id === id) || {}) === 'value' ? Number(b.value) || 0 : Number(b.qty) || 0), 0);
+      const st = rq.map(x => { const left = x.total - usage(x, d.id) - me(x.id); return { x, left, k: qLevel(x, left) }; });
+      bonusBox.replaceChildren(
+        el('div', { className: 'oi-head' }, el('b', { textContent: '🎁 البونص الممنوح من الشركة' }),
+          el('button', { type: 'button', className: 'btn ghost sm', textContent: '+ بونص', onclick: () => { B.push({ name: '', qty: 1, value: 0, qid: '' }); drawBonus(); } })),
+        ...(QT === null ? [el('p', { className: 'bn-hint', textContent: 'تعذّر تحميل مخصّصات البونص (تأكد من نشر قواعد Firebase الجديدة).' })] : []),
+        ...st.map(({ x, left, k }) => el('div', { className: 'bn-chip ' + k, textContent: (k === 'over' ? '⚠ تجاوزت «' + x.name + '» بمقدار ' + qFmt(x, -left) : (k === 'out' ? '⛔ نفد «' + x.name + '»' : (k === 'low' ? '⚠ «' + x.name + '» يوشك على النفاد — ' : '🎁 «' + x.name + '» — ') + 'المتبقي بعد هذا الطلب ' + qFmt(x, left))) + (k === 'ok' || k === 'low' ? ' من ' + qFmt(x, x.total) : '') })),
+        ...B.map((b, i) => {
+          const match = x => !x.items.length || x.items.includes(b.name);
+          const sel = el('select', { onchange: e => { b.qid = e.target.value; drawBonus(); } }, el('option', { value: '', textContent: '— بدون مخصّص —' }),
+            ...rq.map(x => el('option', { value: x.id, textContent: x.name + (b.name && !match(x) ? ' (المادة خارجه)' : ''), selected: x.id === b.qid })));
+          const autoVal = () => { if (b._manual) return; const it = w.find(z => z.name.trim() === b.name) || D.products.find(z => z.name.trim() === b.name); const pr = it ? (it.price || 0) : 0; if (pr) { b.value = pr * (Number(b.qty) || 0); vin.value = b.value; } };
+          const vin = el('input', { type: 'number', min: 0, inputMode: 'numeric', placeholder: 'القيمة د.ع', value: b.value || '', oninput: e => { b.value = Number(e.target.value); b._manual = true; drawBonus.soft(); } });
+          return el('div', { className: 'rl' }, el('div', { className: 'rl-1' }, el('input', { attrs: { list: 'bn_dl' }, value: b.name, placeholder: 'مادة البونص',
+            oninput: e => { b.name = e.target.value.trim(); if (!b.qid) { const m = rq.find(match); if (m && b.name) { b.qid = m.id; sel.value = m.id; } } autoVal(); drawBonus.soft(); } }),
+            el('button', { type: 'button', className: 'ib del', attrs: { 'aria-label': 'حذف' }, onclick: () => { B.splice(i, 1); drawBonus(); } }, icon('trash'))),
+            el('div', { className: 'rl-2' }, el('input', { type: 'number', min: 1, inputMode: 'numeric', placeholder: 'الكمية', value: b.qty || '', oninput: e => { b.qty = Number(e.target.value); autoVal(); drawBonus.soft(); } }), vin, sel));
+        }),
+        el('datalist', { id: 'bn_dl' }, ...[...new Set([...rq.flatMap(x => x.items), ...D.products.map(p => p.name.trim())])].map(n => el('option', { value: n }))),
+        el('div', { className: 'acts' }, el('button', { type: 'button', className: 'btn ghost sm', textContent: '💾 حفظ البونص', onclick: async function () {
+          this.disabled = true;
+          try { const bonus = getBonus(); await ensure(); await OAPI.updateOrder(d.id, { bonus }); O.docs[d.id] = { ...(O.docs[d.id] || d), bonus, updatedAt: Date.now() }; save(); toast('تم حفظ البونص ✅'); drawBonus(); }
+          catch (e) { toast(e.message); } this.disabled = false; } })));
+    };
+    let softT = null; drawBonus.soft = () => { clearTimeout(softT); softT = setTimeout(() => { const a = document.activeElement, id = a && a.placeholder, pos = a && a.selectionStart; const keep = { id, i: [...bonusBox.querySelectorAll('input')].indexOf(a), pos }; drawBonus(); if (keep.i >= 0) { const n = bonusBox.querySelectorAll('input')[keep.i]; if (n) { n.focus(); try { n.setSelectionRange(keep.pos, keep.pos); } catch {} } } }, 400); };
+    drawBonus(); loadQuotas().then(drawBonus).catch(() => { QT = QT || null; drawBonus(); });
     const whNote = el('textarea', { placeholder: 'ملاحظات التجهيز للمذخر — تظهر أسفل ملف PDF (اختياري)', value: d.whNote || '', rows: 3 });
     const rows = w.map((it, i) => el('div', { className: 'oi' }, el('div', { className: 'oi-n' }, el('b', { textContent: it.name }), el('small', { textContent: `المطلوب ${it.qty} × ${fmt(it.price || 0)}` })),
       el('input', { type: 'number', min: 0, max: it.qty, inputMode: 'numeric', placeholder: String(it.qty), value: it.prepared == null ? '' : it.prepared, attrs: { 'aria-label': 'الكمية المجهّزة' },
@@ -108,7 +143,7 @@ const OrdersUI = (() => {
       this.disabled = true;
       try {
         const items = w.map(i => ({ ...i, prepared: ['ready', 'delivered'].includes(status) && i.prepared == null ? i.qty : i.prepared }));
-        const patch = { status, items, repNote: note.value.trim(), whNote: whNote.value.trim(), holdReason: status === 'hold' ? reason : '', history: [...(d.history || []), { s: status, at: Date.now(), note: reason }] };
+        const patch = { status, items, repNote: note.value.trim(), whNote: whNote.value.trim(), bonus: getBonus(), holdReason: status === 'hold' ? reason : '', history: [...(d.history || []), { s: status, at: Date.now(), note: reason }] };
         await ensure(); await OAPI.updateOrder(d.id, patch);
         O.docs[d.id] = { ...d, ...patch, updatedAt: Date.now() }; save(); drawOrders(); close(); toast('تم تحديث الحالة ✅');
         if (await confirmBox(`أصبحت حالة الطلب «${ST()[status].t}». هل تريد إبلاغ الصيدلاني عبر واتساب؟`, 'فتح واتساب', false)) openWa(O.docs[d.id]);
@@ -126,7 +161,7 @@ const OrdersUI = (() => {
         c.address ? el('p', { textContent: '📍 ' + c.address }) : null, c.notes ? el('p', { textContent: '📝 ' + c.notes }) : null,
         el('p', { style: 'color:var(--muted);font-size:13px', textContent: `${d.warehouse && d.warehouse.name ? 'مذخر ' + d.warehouse.name + ' · ' : ''}المجموع ${fmt(d.total)} د.ع` })),
       el('div', { className: 'oi-head' }, el('b', { textContent: 'الأصناف — اكتب الكمية المجهّزة' }), all), ...rows,
-      el('div', { className: 'fld', style: 'margin-top:12px' }, note),
+      el('div', { className: 'fld', style: 'margin-top:12px' }, note), bonusBox,
       el('div', { className: 'acts' }, ...A.map(a => act(...a))),
       el('div', { className: 'acts' }, el('button', { type: 'button', className: 'btn ghost sm', textContent: '💬 إبلاغ الصيدلاني', onclick: () => openWa({ ...d, repNote: note.value.trim(), items: w }) }),
         el('button', { type: 'button', className: 'btn ghost sm', textContent: '↩ مرتجع لهذه الصيدلية', onclick: () => { close(); tab = 'returns'; drawTabs(); drawTab(); openReturn(null, { pharmacy: c.name, phone: c.phone, orderNo: d.no }); } })),
@@ -215,6 +250,95 @@ const OrdersUI = (() => {
       } })]);
   }
 
+
+
+  // ================= البونص المخصّص من الشركة =================
+  // كل مخصّص: id, name, warehouse ('' = كل المذاخر), unit ('qty'|'value'), total, items[] (فارغ = أي مادة), from, to (0 = بلا حد), warnPct, usedBefore, note
+  const QK = 'adm_quotas_v1';
+  let QT = ls.get(QK, null), qAt = 0;
+  async function loadQuotas(force) {
+    if (!force && QT && Date.now() - qAt < 60000) return;
+    await ensure();
+    QT = (await OAPI.listQuotas()).map(x => ({ items: [], from: 0, to: 0, warnPct: 20, usedBefore: 0, ...x })).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+    qAt = Date.now(); ls.set(QK, QT);
+  }
+  const qUnit = x => x.unit === 'value' ? 'value' : 'qty';
+  const qFmt = (x, n) => qUnit(x) === 'value' ? fmt(n) + ' د.ع' : fmt(n) + ' علبة';
+  const inPeriod = (x, t) => (!x.from || t >= x.from) && (!x.to || t <= x.to + 864e5 - 1);
+  const bVal = (x, b) => qUnit(x) === 'value' ? Number(b.value) || 0 : Number(b.qty) || 0;
+  function usageLog(x) {
+    const out = [];
+    for (const d of Object.values(O.docs)) {
+      if (d.status === 'cancelled' || !inPeriod(x, d.createdAt || 0)) continue;
+      for (const b of d.bonus || []) if (b.qid === x.id) out.push({ d, b });
+    }
+    return out.sort((a, b) => (b.d.createdAt || 0) - (a.d.createdAt || 0));
+  }
+  const usage = (x, exceptId) => (Number(x.usedBefore) || 0) + usageLog(x).filter(r => r.d.id !== exceptId).reduce((t, r) => t + bVal(x, r.b), 0);
+  const qLevel = (x, left) => left < 0 ? 'over' : left === 0 ? 'out' : (x.total > 0 && left / x.total * 100 <= (Number(x.warnPct) || 20)) ? 'low' : 'ok';
+  function bonusBanner() {
+    return (QT || []).filter(x => inPeriod(x, Date.now())).map(x => ({ x, left: x.total - usage(x) })).map(o => ({ ...o, k: qLevel(o.x, o.left) })).filter(o => o.k !== 'ok')
+      .map(({ x, left, k }) => el('div', { className: 'bn-chip ' + k, onclick: () => { tab = 'bonus'; drawTabs(); drawTab(); }, style: 'cursor:pointer',
+        textContent: (k === 'over' ? '⚠ تجاوز مخصّص «' + x.name + '» بمقدار ' + qFmt(x, -left) : k === 'out' ? '⛔ نفد مخصّص «' + x.name + '»' : '⚠ مخصّص «' + x.name + '» باقي منه ' + qFmt(x, left) + ' فقط') }));
+  }
+
+  function tabBonus(m) {
+    const U = bUi = { err: el('div'), list: el('div', { className: 'oc-list' }) };
+    m.append(el('div', { className: 'rowline' }, el('button', { type: 'button', className: 'btn', style: 'flex:1', textContent: '+ مخصّص بونص جديد', onclick: () => openQuota(null) }),
+      el('button', { type: 'button', className: 'btn ghost', textContent: '↻', attrs: { 'aria-label': 'تحديث' }, onclick: async () => { try { await loadQuotas(true); err = ''; } catch (e) { err = e; } drawBonusTab(); } })), U.err, U.list);
+    drawBonusTab(); (async () => { try { await loadQuotas(true); err = ''; } catch (e) { err = e; } drawBonusTab(); })(); refresh();
+  }
+  function drawBonusTab() {
+    if (!bUi || !bUi.list.isConnected) return;
+    bUi.err.replaceChildren(...(err && !QT ? [notice(err)] : []));
+    const rows = QT || [];
+    bUi.list.replaceChildren(...(rows.length ? rows.map(x => {
+      const used = usage(x), left = x.total - used, k = qLevel(x, left), pct = x.total > 0 ? Math.max(0, Math.min(100, used / x.total * 100)) : 0;
+      const per = x.from || x.to ? `${x.from ? new Date(x.from).toLocaleDateString('ar-IQ') : '…'} ← ${x.to ? new Date(x.to).toLocaleDateString('ar-IQ') : 'مفتوح'}` : 'مفتوح بلا مدة';
+      return el('article', { className: 'oc bq ' + k, onclick: () => openQuota(x) },
+        el('div', { className: 'oc-h' }, el('b', { textContent: x.name }), el('span', { className: 'ord-st', style: 'background:#475569', textContent: x.warehouse ? 'مذخر ' + x.warehouse : 'كل المذاخر' }), el('small', { textContent: per })),
+        el('div', { className: 'bq-bar' }, el('i', { style: `width:${pct}%` })),
+        el('div', { className: 'bq-n' }, el('span', { textContent: 'المتبقي ' + qFmt(x, left) }), el('small', { textContent: `المصروف ${qFmt(x, used)} من ${qFmt(x, x.total)}` })),
+        el('div', { className: 'oc-m', textContent: x.items.length ? 'المواد: ' + x.items.slice(0, 4).join('، ') + (x.items.length > 4 ? ` +${x.items.length - 4}` : '') : 'أي مادة' }));
+    }) : [el('p', { className: 'oc-empty', textContent: err ? '' : (QT ? 'لا توجد مخصّصات — أضف أول مخصّص بونص' : 'جارٍ التحميل…') })]));
+  }
+  function openQuota(x) {
+    const R = x ? JSON.parse(JSON.stringify(x)) : { id: OAPI.newId(), name: '', warehouse: '', unit: 'qty', total: 0, items: [], from: 0, to: 0, warnPct: 20, usedBefore: 0, note: '' };
+    const day = ms => ms ? new Date(ms).toISOString().slice(0, 10) : '';
+    const fld = (l, i) => el('div', { className: 'fld' }, el('label', { textContent: l }), i);
+    const chips = el('div', { className: 'bq-chips' }), pl = el('datalist', { id: 'bq_dl' }, ...D.products.map(p => el('option', { value: p.name.trim() })));
+    const drawChips = () => chips.replaceChildren(...R.items.map((n, i) => el('span', { className: 'bq-chip' }, n, el('button', { type: 'button', attrs: { 'aria-label': 'حذف' }, textContent: '×', onclick: () => { R.items.splice(i, 1); drawChips(); } }))));
+    const addIn = el('input', { attrs: { list: 'bq_dl' }, placeholder: 'اكتب اسم مادة واضغط إضافة' });
+    const add = () => { const v = addIn.value.trim(); if (v && !R.items.includes(v)) R.items.push(v); addIn.value = ''; drawChips(); };
+    addIn.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); add(); } });
+    drawChips();
+    const log = x ? usageLog(x) : [];
+    modal(x ? 'تعديل مخصّص بونص' : 'مخصّص بونص جديد', [pl,
+      fld('اسم المخصّص', el('input', { value: R.name, placeholder: 'مثال: بونص كانون الأول', oninput: e => { R.name = e.target.value.trim(); } })),
+      fld('المذخر', el('select', { onchange: e => { R.warehouse = e.target.value; } }, el('option', { value: '', textContent: 'كل المذاخر' }), ...((D.cfg.priceLists || []).map(w => el('option', { value: w.name, textContent: w.name, selected: w.name === R.warehouse }))))),
+      fld('وحدة الحساب', el('select', { onchange: e => { R.unit = e.target.value; } }, el('option', { value: 'qty', textContent: 'بالكمية (علب)', selected: R.unit !== 'value' }), el('option', { value: 'value', textContent: 'بالقيمة (دينار)', selected: R.unit === 'value' }))),
+      fld('الكمية / القيمة المخصّصة', el('input', { type: 'number', min: 0, inputMode: 'numeric', value: R.total || '', oninput: e => { R.total = Number(e.target.value); } })),
+      el('div', { className: 'oi-head' }, el('b', { textContent: 'المواد المشمولة (فارغ = أي مادة)' }), el('button', { type: 'button', className: 'btn ghost sm', textContent: '+ إضافة', onclick: add })), addIn, chips,
+      el('div', { className: 'rowline' }, fld('من تاريخ (اختياري)', el('input', { type: 'date', value: day(R.from), onchange: e => { R.from = e.target.value ? new Date(e.target.value + 'T00:00:00').getTime() : 0; } })),
+        fld('إلى تاريخ (اختياري)', el('input', { type: 'date', value: day(R.to), onchange: e => { R.to = e.target.value ? new Date(e.target.value + 'T00:00:00').getTime() : 0; } }))),
+      fld('نبّهني عندما يتبقى (%)', el('input', { type: 'number', min: 1, max: 90, inputMode: 'numeric', value: R.warnPct, oninput: e => { R.warnPct = Number(e.target.value) || 20; } })),
+      fld('المصروف سابقاً (قبل استخدام اللوحة)', el('input', { type: 'number', min: 0, inputMode: 'numeric', value: R.usedBefore || '', placeholder: '0', oninput: e => { R.usedBefore = Number(e.target.value) || 0; } })),
+      fld('ملاحظات', el('textarea', { value: R.note || '', oninput: e => { R.note = e.target.value; } })),
+      ...(x ? [el('div', { className: 'oi-head' }, el('b', { textContent: 'سجل الصرف (' + log.length + ')' })),
+        ...(log.length ? log.map(({ d, b }) => el('div', { className: 'bq-log', textContent: `${new Date(d.createdAt || 0).toLocaleDateString('ar-IQ')} · #${d.no} · ${(d.cust || {}).name || ''} — ${b.name} × ${b.qty}${b.value ? ' (' + fmt(b.value) + ' د.ع)' : ''}` })) : [el('p', { className: 'oc-empty', textContent: 'لم يُصرف منه شيء بعد' })])] : [])],
+      cl => [x ? el('button', { type: 'button', className: 'btn ghost danger-t', textContent: 'حذف', onclick: async () => { if (!await confirmBox('حذف هذا المخصّص؟ (البونص المسجّل في الطلبات يبقى لكن لن يُحسب عليه)', 'حذف')) return;
+        try { await ensure(); await OAPI.deleteQuota(R.id); QT = (QT || []).filter(z => z.id !== R.id); ls.set(QK, QT); drawBonusTab(); cl(); toast('تم الحذف'); } catch (e) { toast(e.message); } } })
+        : el('button', { type: 'button', className: 'btn ghost', textContent: 'إلغاء', onclick: cl }),
+      el('button', { type: 'button', className: 'btn', textContent: 'حفظ', onclick: async function () {
+        add();
+        if (!R.name) return toast('اكتب اسم المخصّص'); if (!(R.total > 0)) return toast('أدخل الكمية أو القيمة المخصّصة');
+        if (R.from && R.to && R.to < R.from) return toast('تاريخ النهاية قبل البداية');
+        this.disabled = true;
+        try { await ensure(); const doc = { id: R.id, name: R.name, warehouse: R.warehouse, unit: R.unit, total: R.total, items: R.items, from: R.from || 0, to: R.to || 0, warnPct: R.warnPct || 20, usedBefore: R.usedBefore || 0, note: R.note || '' };
+          await OAPI.saveQuota(doc); QT = [...(QT || []).filter(z => z.id !== doc.id), doc].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar')); ls.set(QK, QT); drawBonusTab(); cl(); toast('تم حفظ المخصّص ✅'); refresh(); }
+        catch (e) { this.disabled = false; toast(e.message); }
+      } })]);
+  }
 
   // ================= الكشوفات (كشف حساب الصيدليات) =================
   const itemsVal = d => d.items.reduce((s, i) => s + (i.prepared == null ? i.qty : i.prepared) * (i.price || 0), 0);
@@ -478,5 +602,5 @@ const OrdersUI = (() => {
           try { await unseal(p, s.box); } catch { return toast('كلمة مرور اللوحة غير صحيحة'); } fbCred = null; s.box = await seal(p, { token }); ls.set('adm_box', s); OAPI._tok = null; paint(); toast('تم الحذف'); } }) : null));
   }
 
-  return { tabOrders, tabReturns, tabStatement, settingsBox, groupsBox, makeOrderPdf, stop };
+  return { tabOrders, tabBonus, tabReturns, tabStatement, settingsBox, groupsBox, makeOrderPdf, stop };
 })();

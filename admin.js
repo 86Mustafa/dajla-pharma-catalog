@@ -308,7 +308,7 @@ function armIdle() {
 }
 
 // ---------- هيكل اللوحة ----------
-const TABS = [['items', 'الأصناف'], ['prices', 'الأسعار'], ['offers', 'العروض'], ['orders', 'الطلبات'], ['returns', 'المرتجعات'], ['statement', 'الكشوفات'], ['settings', 'الإعدادات']];
+const TABS = [['items', 'الأصناف'], ['prices', 'الأسعار'], ['offers', 'العروض'], ['orders', 'الطلبات'], ['returns', 'المرتجعات'], ['bonus', 'البونص'], ['statement', 'الكشوفات'], ['settings', 'الإعدادات']];
 function renderApp() {
   app().replaceChildren(
     el('header', { className: 'top' }, el('div', { className: 'top-in' }, el('h1', { textContent: 'لوحة المندوب' }),
@@ -322,7 +322,7 @@ function drawTabs() {
 }
 function drawTab() {
   const m = $('#main'); m.replaceChildren(); OrdersUI.stop();
-  ({ items: tabItems, prices: tabPrices, offers: tabOffers, orders: OrdersUI.tabOrders, returns: OrdersUI.tabReturns, statement: OrdersUI.tabStatement, settings: tabSettings })[tab](m);
+  ({ items: tabItems, prices: tabPrices, offers: tabOffers, orders: OrdersUI.tabOrders, returns: OrdersUI.tabReturns, bonus: OrdersUI.tabBonus, statement: OrdersUI.tabStatement, settings: tabSettings })[tab](m);
 }
 function drawPub() {   // يُحدَّث النص فقط (لا نعيد بناء الزر حتى لا تضيع نقرة المستخدم أثناء إغلاق حقل الإدخال)
   const p = $('#pub'); if (!p) return;
